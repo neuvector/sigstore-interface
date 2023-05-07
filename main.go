@@ -25,15 +25,16 @@ import (
 
 type Configuration struct {
 	ImageDigest   string        `json:"ImageDigest"`
-	RootOfTrust   RootOfTrust   `json:"RootOfTrust"`
-	Verifiers     []Verifier    `json:"Verifiers"`
+	RootsOfTrust  []RootOfTrust `json:"RootsOfTrust"`
 	SignatureData SignatureData `json:"SignatureData"`
 }
 
 type RootOfTrust struct {
-	RekorPublicKey string `json:"RekorPublicKey"`
-	RootCert       string `json:"RootCert"`
-	SCTPublicKey   string `json:"SCTPublicKey"`
+	Name           string     `json:"Name"`
+	RekorPublicKey string     `json:"RekorPublicKey"`
+	RootCert       string     `json:"RootCert"`
+	SCTPublicKey   string     `json:"SCTPublicKey"`
+	Verifiers      []Verifier `json:"Verifiers"`
 }
 
 type Verifier struct {
@@ -41,15 +42,15 @@ type Verifier struct {
 	Type           string                 `json:"Type"`
 	IgnoreTLog     bool                   `json:"IgnoreTLog"`
 	IgnoreSCT      bool                   `json:"IgnoreSCT"`
-	KeyPairOptions KeyPairVerifierOptions `json:"KeyPairOptions"`
-	KeylessOptions KeylessVerifierOptions `json:"KeylessOptions"`
+	KeyPairOptions VerifierKeyPairOptions `json:"KeyPairOptions"`
+	KeylessOptions VerifierKeylessOptions `json:"KeylessOptions"`
 }
 
-type KeyPairVerifierOptions struct {
+type VerifierKeyPairOptions struct {
 	PublicKey string `json:"PublicKey"`
 }
 
-type KeylessVerifierOptions struct {
+type VerifierKeylessOptions struct {
 	CertIssuer  string `json:"CertIssuer"`
 	CertSubject string `json:"CertSubject"`
 }
@@ -75,9 +76,12 @@ func main() {
 		log.Fatalf("error generating objects for signature data: %s", err.Error())
 	}
 
-	satisfiedVerifiers, err := verify(imageDigestHash, config, signatures)
-	if err != nil {
-		log.Fatalf("error verifying signatures: %s", err.Error())
+	satisfiedVerifiers := []string{}
+	for _, rootOfTrust := range config.RootsOfTrust {
+		satisfiedVerifiers, err = verify(imageDigestHash, rootOfTrust, signatures)
+		if err != nil {
+			log.Fatalf("error verifying signatures: %s", err.Error())
+		}
 	}
 
 	fmt.Println("satisfied verifiers")
@@ -115,14 +119,14 @@ func generateCosignSignatureObjects(sigData SignatureData) ([]oci.Signature, err
 	return signatures, nil
 }
 
-func verify(imgDigest v1.Hash, config Configuration, sigs []oci.Signature) (satisfiedVerifiers []string, err error) {
+func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature) (satisfiedVerifiers []string, err error) {
 	ctx := context.Background()
 	cosignOptions := cosign.CheckOpts{ClaimVerifier: cosign.SimpleClaimVerifier}
-	err = setRootOfTrustCosignOptions(&cosignOptions, config.RootOfTrust, ctx)
+	err = setRootOfTrustCosignOptions(&cosignOptions, rootOfTrust, ctx)
 	if err != nil {
 		return satisfiedVerifiers, fmt.Errorf("could not set root of trust cosign check options: %s", err.Error())
 	}
-	for _, verifier := range config.Verifiers {
+	for _, verifier := range rootOfTrust.Verifiers {
 		fmt.Printf("checking verifier %s\n", verifier.Name)
 		err = setVerifierCosignOptions(&cosignOptions, verifier, ctx)
 		if err != nil {
@@ -136,7 +140,7 @@ func verify(imgDigest v1.Hash, config Configuration, sigs []oci.Signature) (sati
 			}
 			if err == nil {
 				fmt.Printf("signature %d satisfies verifier %s\n", i, verifier.Name)
-				satisfiedVerifiers = append(satisfiedVerifiers, verifier.Name)
+				satisfiedVerifiers = append(satisfiedVerifiers, fmt.Sprintf("%s/%s", rootOfTrust.Name, verifier.Name))
 				break
 			}
 		}

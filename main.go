@@ -197,7 +197,11 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 	}
 	// sct pub keys
 	if rootOfTrust.SCTPublicKey != "" {
-		return errors.New("providing an SCTPublicKey in the root of trust configuration has not yet been implemented")
+		sctPubKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
+		if err := sctPubKeyCollection.AddTransparencyLogPubKey([]byte(rootOfTrust.SCTPublicKey), tuf.Active); err != nil {
+			return fmt.Errorf("could not add custom sct public key to collection: %w", err)
+		}
+		cosignOptions.CTLogPubKeys = &sctPubKeyCollection
 	} else {
 		cosignOptions.CTLogPubKeys, err = cosign.GetCTLogPubs(ctx)
 		if err != nil {

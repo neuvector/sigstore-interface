@@ -38,11 +38,13 @@ type RootOfTrust struct {
 	Verifiers      []Verifier `json:"Verifiers"`
 }
 
+func (r *RootOfTrust) IsPublic() bool {
+	return r.RekorPublicKey == "" && r.RootCert == "" && r.SCTPublicKey == ""
+}
+
 type Verifier struct {
 	Name           string                 `json:"Name"`
 	Type           string                 `json:"Type"`
-	IgnoreTLog     bool                   `json:"IgnoreTLog"`
-	IgnoreSCT      bool                   `json:"IgnoreSCT"`
 	KeyPairOptions VerifierKeyPairOptions `json:"KeyPairOptions"`
 	KeylessOptions VerifierKeylessOptions `json:"KeylessOptions"`
 }
@@ -131,7 +133,7 @@ func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature) (s
 	}
 	for _, verifier := range rootOfTrust.Verifiers {
 		fmt.Printf("checking verifier %s\n", verifier.Name)
-		err = setVerifierCosignOptions(&cosignOptions, verifier, ctx)
+		err = setVerifierCosignOptions(&cosignOptions, verifier, rootOfTrust, ctx)
 		if err != nil {
 			return satisfiedVerifiers, fmt.Errorf("could not set cosign options for verifier %s: %s", verifier.Name, err.Error())
 		}
@@ -214,7 +216,7 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 	return nil
 }
 
-func setVerifierCosignOptions(cosignOptions *cosign.CheckOpts, verifier Verifier, ctx context.Context) (err error) {
+func setVerifierCosignOptions(cosignOptions *cosign.CheckOpts, verifier Verifier, rootOfTrust RootOfTrust, ctx context.Context) (err error) {
 	switch verifier.Type {
 	case "keypair":
 		cosignOptions.SigVerifier, err = sig.LoadPublicKeyRaw([]byte(verifier.KeyPairOptions.PublicKey), crypto.SHA256)
@@ -231,7 +233,13 @@ func setVerifierCosignOptions(cosignOptions *cosign.CheckOpts, verifier Verifier
 	default:
 		return fmt.Errorf("invalid verification type in config file, must be either \"keypair\" or \"keyless\", got \"%s\"", verifier.Type)
 	}
-	cosignOptions.IgnoreTlog = verifier.IgnoreTLog
-	cosignOptions.IgnoreSCT = verifier.IgnoreSCT
+	if !rootOfTrust.IsPublic() {
+		if rootOfTrust.RekorPublicKey == "" {
+			cosignOptions.IgnoreTlog = true
+		}
+		if rootOfTrust.SCTPublicKey == "" {
+			cosignOptions.IgnoreSCT = true
+		}
+	}
 	return nil
 }

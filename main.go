@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/static"
@@ -76,16 +77,18 @@ func main() {
 		log.Fatalf("error generating objects for signature data: %s", err.Error())
 	}
 
-	satisfiedVerifiers := []string{}
+	allSatisfiedVerifiers := []string{}
 	for _, rootOfTrust := range config.RootsOfTrust {
-		satisfiedVerifiers, err = verify(imageDigestHash, rootOfTrust, signatures)
+		satisfiedVerifiers, err := verify(imageDigestHash, rootOfTrust, signatures)
 		if err != nil {
 			log.Fatalf("error verifying signatures: %s", err.Error())
+		} else if len(satisfiedVerifiers) > 0 {
+			allSatisfiedVerifiers = append(allSatisfiedVerifiers, satisfiedVerifiers...)
 		}
 	}
 
 	fmt.Println("satisfied verifiers")
-	fmt.Println(satisfiedVerifiers)
+	fmt.Println(strings.Join(allSatisfiedVerifiers, ", "))
 }
 
 func loadConfiguration() (config Configuration, err error) {

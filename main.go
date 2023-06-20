@@ -66,31 +66,33 @@ type SignatureData struct {
 func main() {
 	config, err := loadConfiguration()
 	if err != nil {
-		log.Fatalf("error loading config: %s", err.Error())
+		log.Fatalf("ERROR: error loading config: %s", err.Error())
 	}
 
 	imageDigestHash, err := v1.NewHash(config.ImageDigest)
 	if err != nil {
-		log.Fatalf("error hashing image digest: %s", err.Error())
+		log.Fatalf("ERROR: error hashing image digest: %s", err.Error())
 	}
 
 	signatures, err := generateCosignSignatureObjects(config.SignatureData)
 	if err != nil {
-		log.Fatalf("error generating objects for signature data: %s", err.Error())
+		log.Fatalf("ERROR: error generating objects for signature data: %s", err.Error())
 	}
 
 	allSatisfiedVerifiers := []string{}
 	for _, rootOfTrust := range config.RootsOfTrust {
+		fmt.Printf("checking root of trust: %s\n", rootOfTrust.Name)
 		satisfiedVerifiers, err := verify(imageDigestHash, rootOfTrust, signatures)
 		if err != nil {
-			log.Fatalf("error verifying signatures: %s", err.Error())
+			// line with prefix "ERROR: " is recognized by scanner for error encounted when verifying against a verifier
+			fmt.Printf("ERROR: %s\n", err.Error())
 		} else if len(satisfiedVerifiers) > 0 {
 			allSatisfiedVerifiers = append(allSatisfiedVerifiers, satisfiedVerifiers...)
 		}
 	}
 
-	fmt.Println("satisfied verifiers")
-	fmt.Println(strings.Join(allSatisfiedVerifiers, ", "))
+	// line with prefix "Satisfied verifiers: " is recognized by scanner for all the satisfied verifiers separated by ", "
+	fmt.Printf("Satisfied verifiers: %s\n", strings.Join(allSatisfiedVerifiers, ", "))
 }
 
 func loadConfiguration() (config Configuration, err error) {
@@ -129,24 +131,25 @@ func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature) (s
 	cosignOptions := cosign.CheckOpts{ClaimVerifier: cosign.SimpleClaimVerifier}
 	err = setRootOfTrustCosignOptions(&cosignOptions, rootOfTrust, ctx)
 	if err != nil {
-		return satisfiedVerifiers, fmt.Errorf("could not set root of trust cosign check options: %s", err.Error())
+		return satisfiedVerifiers, fmt.Errorf("could not set root of trust %s cosign check options: %s", rootOfTrust.Name, err.Error())
 	}
 	for _, verifier := range rootOfTrust.Verifiers {
 		fmt.Printf("checking verifier %s\n", verifier.Name)
 		err = setVerifierCosignOptions(&cosignOptions, verifier, rootOfTrust, ctx)
 		if err != nil {
-			return satisfiedVerifiers, fmt.Errorf("could not set cosign options for verifier %s: %s", verifier.Name, err.Error())
-		}
-		for i, signature := range sigs {
-			fmt.Printf("verifying signature %d\n", i)
-			_, err := cosign.VerifyImageSignature(ctx, signature, imgDigest, &cosignOptions)
-			if err != nil {
-				fmt.Printf("signature not verified: %s\n", err.Error())
-			}
-			if err == nil {
-				fmt.Printf("signature %d satisfies verifier %s\n", i, verifier.Name)
-				satisfiedVerifiers = append(satisfiedVerifiers, fmt.Sprintf("%s/%s", rootOfTrust.Name, verifier.Name))
-				break
+			fmt.Printf("ERROR: %s\n", err.Error())
+		} else {
+			for i, signature := range sigs {
+				fmt.Printf("verifying signature %d\n", i)
+				_, err := cosign.VerifyImageSignature(ctx, signature, imgDigest, &cosignOptions)
+				if err != nil {
+					// the image is not signed by this verifier
+					fmt.Printf("signature not verified: %s\n", err.Error())
+				} else {
+					fmt.Printf("signature %d satisfies verifier %s\n", i, verifier.Name)
+					satisfiedVerifiers = append(satisfiedVerifiers, fmt.Sprintf("%s/%s", rootOfTrust.Name, verifier.Name))
+					break
+				}
 			}
 		}
 	}
@@ -221,7 +224,7 @@ func setVerifierCosignOptions(cosignOptions *cosign.CheckOpts, verifier Verifier
 	case "keypair":
 		cosignOptions.SigVerifier, err = sig.LoadPublicKeyRaw([]byte(verifier.KeyPairOptions.PublicKey), crypto.SHA256)
 		if err != nil {
-			return fmt.Errorf("could not load verifier's pem encoded public key: %s", err.Error())
+			return fmt.Errorf("could not load PEM encoded public key of verifier %s under %s: %s", verifier.Name, rootOfTrust.Name, err.Error())
 		}
 	case "keyless":
 		cosignOptions.Identities = []cosign.Identity{
@@ -231,7 +234,8 @@ func setVerifierCosignOptions(cosignOptions *cosign.CheckOpts, verifier Verifier
 			},
 		}
 	default:
-		return fmt.Errorf("invalid verification type in config file, must be either \"keypair\" or \"keyless\", got \"%s\"", verifier.Type)
+		// verifier.Type must be "keypair" or "keyless"
+		return fmt.Errorf("invalid verification type in config file: %s", verifier.Type)
 	}
 	if !rootOfTrust.IsPublic() {
 		if rootOfTrust.RekorPublicKey == "" {

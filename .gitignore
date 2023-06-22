@@ -19,3 +19,6 @@ testing/signatures
 
 # compiled binary
 sigstore-interface
+
+# custom environment setup used for testing
+testing/env

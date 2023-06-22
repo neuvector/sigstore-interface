@@ -81,7 +81,7 @@ func main() {
 
 	allSatisfiedVerifiers := []string{}
 	for _, rootOfTrust := range config.RootsOfTrust {
-		fmt.Printf("checking root of trust: %s\n", rootOfTrust.Name)
+		fmt.Printf("\n>>>> checking root of trust: %s\n", rootOfTrust.Name)
 		satisfiedVerifiers, err := verify(imageDigestHash, rootOfTrust, signatures)
 		if err != nil {
 			// line with prefix "ERROR: " is recognized by scanner for error encounted when verifying against a verifier
@@ -134,7 +134,9 @@ func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature) (s
 		return satisfiedVerifiers, fmt.Errorf("could not set root of trust %s cosign check options: %s", rootOfTrust.Name, err.Error())
 	}
 	for _, verifier := range rootOfTrust.Verifiers {
-		fmt.Printf("checking verifier %s\n", verifier.Name)
+		cosignOptions.SigVerifier = nil
+		cosignOptions.Identities = nil
+		fmt.Printf(">> checking verifier %s\n", verifier.Name)
 		err = setVerifierCosignOptions(&cosignOptions, verifier, rootOfTrust, ctx)
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err.Error())

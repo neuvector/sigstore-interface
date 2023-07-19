@@ -23,9 +23,8 @@ func (d inMemoryDest) Delete() error {
 	panic("inMemoryDest delete function should not run")
 }
 
-func GetTargets(targetname string, usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error) {
+func GetTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error) {
 	// client initialization
-	defer globalBuffer.Reset()
 	var httpClient *http.Client
 	if proxy.URL != "" {
 		transport := proxy.HttpTransport()
@@ -73,68 +72,18 @@ func GetTargets(targetname string, usage sigtuf.UsageKind, proxy Proxy) ([]sigtu
 			continue
 		}
 		if scm.Sigstore.Usage == usage {
-			fmt.Printf("matched usage: %s\n", name)
 			dest := inMemoryDest{}
 			err = tufClient.Download(name, dest)
 			if err != nil {
-				panic(fmt.Errorf("error downloading target: %s", err.Error()))
+				globalBuffer.Reset()
+				return nil, fmt.Errorf("error downloading target: %s", err.Error())
 			}
-			matchedTargets = append(matchedTargets, sigtuf.TargetFile{Target: globalBuffer.Bytes(), Status: scm.Sigstore.Status})
+			globalBytes := globalBuffer.Bytes()
+			targetBytes := make([]byte, len(globalBytes))
+			copy(targetBytes, globalBytes)
 			globalBuffer.Reset()
+			matchedTargets = append(matchedTargets, sigtuf.TargetFile{Target: targetBytes, Status: scm.Sigstore.Status})
 		}
 	}
 	return matchedTargets, nil
 }
-
-func GetPublicRootOfTrustRekorKeys(proxy Proxy) ([][]byte, error) {
-	var rekorKeys [][]byte
-	targets, err := GetTargets("", sigtuf.Rekor, proxy)
-	if err != nil {
-		return nil, fmt.Errorf("error getting rekor targets: %s", err.Error())
-	}
-	for _, t := range targets {
-		rekorKeys = append(rekorKeys, t.Target)
-	}
-	return rekorKeys, nil
-}
-
-func GetPublicRootOfTrustSCTKeys(proxy Proxy) ([][]byte, error) {
-	var sctKeys [][]byte
-	targets, err := GetTargets("", sigtuf.CTFE, proxy)
-	if err != nil {
-		return nil, fmt.Errorf("error getting ctfe targets: %s", err.Error())
-	}
-	for _, t := range targets {
-		sctKeys = append(sctKeys, t.Target)
-	}
-	return sctKeys, nil
-}
-
-// func GetPublicInstanceRootOfTrustTarget(targetName string, proxy Proxy) ([]byte, error) {
-// 	defer globalBuffer.Reset()
-// 	var httpClient *http.Client
-// 	if proxy.URL != "" {
-// 		transport := proxy.HttpTransport()
-// 		httpClient = &http.Client{Transport: &transport}
-// 	}
-// 	remoteStore, err := tufclient.HTTPRemoteStore(tuf.DefaultRemoteRoot, nil, httpClient)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("could not create remote store object: %s", err.Error())
-// 	}
-// 	tufClient := tufclient.NewClient(tufclient.MemoryLocalStore(), remoteStore)
-// 	tufClient.Init([]byte(SigstoreTUFRootJSON))
-// 	err = tufClient.UpdateRoots()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error updating tuf client roots: %s", err.Error())
-// 	}
-// 	_, err = tufClient.Update()
-// 	if err != nil {
-// 		return nil, fmt.Errorf("error updating tuf client metadata: %s", err.Error())
-// 	}
-// 	dest := inMemoryDest{}
-// 	err = tufClient.Download(targetName, dest)
-// 	if err != nil {
-// 		panic(fmt.Errorf("error downloading roots: %s", err.Error()))
-// 	}
-// 	return globalBuffer.Bytes(), nil
-// }

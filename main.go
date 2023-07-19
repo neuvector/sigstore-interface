@@ -10,7 +10,6 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"strings"
 
@@ -23,7 +22,6 @@ import (
 	sig "github.com/sigstore/cosign/v2/pkg/signature"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 	"github.com/sigstore/sigstore/pkg/tuf"
-	tufclient "github.com/theupdateframework/go-tuf/client"
 )
 
 type Configuration struct {
@@ -172,65 +170,26 @@ func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature, pr
 	return satisfiedVerifiers, nil
 }
 
-var globalBuffer bytes.Buffer
-
-type inMemoryDest struct{}
-
-func (d inMemoryDest) Write(p []byte) (n int, err error) {
-	return globalBuffer.Write(p)
-}
-
-func (d inMemoryDest) Delete() error {
-	panic("inMemoryDest delete function should not run")
-}
-
-func GetPublicInstanceRootOfTrustTarget(targetName string, proxy Proxy) ([]byte, error) {
-	defer globalBuffer.Reset()
-	var httpClient *http.Client
-	if proxy.URL != "" {
-		transport := proxy.HttpTransport()
-		httpClient = &http.Client{Transport: &transport}
-	}
-	remoteStore, err := tufclient.HTTPRemoteStore(tuf.DefaultRemoteRoot, nil, httpClient)
-	if err != nil {
-		return nil, fmt.Errorf("could not create remote store object: %s", err.Error())
-	}
-	tufClient := tufclient.NewClient(tufclient.MemoryLocalStore(), remoteStore)
-	tufClient.Init([]byte(SigstoreTUFRootJSON))
-	err = tufClient.UpdateRoots()
-	if err != nil {
-		return nil, fmt.Errorf("error updating tuf client roots: %s", err.Error())
-	}
-	_, err = tufClient.Update()
-	if err != nil {
-		return nil, fmt.Errorf("error updating tuf client metadata: %s", err.Error())
-	}
-	dest := inMemoryDest{}
-	err = tufClient.Download(targetName, dest)
-	if err != nil {
-		panic(fmt.Errorf("error downloading roots: %s", err.Error()))
-	}
-	return globalBuffer.Bytes(), nil
-}
-
 func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust RootOfTrust, proxy Proxy, ctx context.Context) (err error) {
-	// rekor public key
-	var rekorKeyToUse []byte
+	// rekor public key(s)
+	var rekorKeys [][]byte
 	if rootOfTrust.RekorPublicKey == "" {
-		rekorKeyToUse, err = GetPublicInstanceRootOfTrustTarget("rekor.pub", proxy)
+		rekorKeys, err = GetPublicRootOfTrustRekorKeys(proxy)
 		if err != nil {
-			return fmt.Errorf("could not retrieve public instance rekor key: %s", err.Error())
+			return fmt.Errorf("could not retrieve public root of trust rekor key(s): %s", err.Error())
 		}
 	} else {
-		rekorKeyToUse = []byte(rootOfTrust.RekorPublicKey)
+		rekorKeys = append(rekorKeys, []byte(rootOfTrust.RekorPublicKey))
 	}
 	rekorKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
-	if err := rekorKeyCollection.AddTransparencyLogPubKey(rekorKeyToUse, tuf.Active); err != nil {
-		return fmt.Errorf("could not add rekor public key to collection: %w", err)
+	for _, rekorKey := range rekorKeys {
+		if err := rekorKeyCollection.AddTransparencyLogPubKey(rekorKey, tuf.Active); err != nil {
+			return fmt.Errorf("could not add rekor public key to collection: %w", err)
+		}
 	}
 	cosignOptions.RekorPubKeys = &rekorKeyCollection
 
-	// root certificate(s)
+	// root & intermediate certificate(s)
 	if rootOfTrust.RootCert != "" {
 		selfSigned := func(cert *x509.Certificate) bool {
 			return bytes.Equal(cert.RawSubject, cert.RawIssuer)
@@ -264,37 +223,24 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 		}
 	}
 
-	// // GetPublicInstanceRootOfTrustTarget("ctfe.pub")
-	// // sct public key
-	// var sctKeyToUse []byte
-	// if rootOfTrust.SCTPublicKey == "" {
-	// 	sctKeyToUse, err = GetPublicInstanceRootOfTrustTarget("ctfe.pub", proxy)
-	// 	if err != nil {
-	// 		return fmt.Errorf("could not retrieve public instance sct key: %s", err.Error())
-	// 	}
-	// } else {
-	// 	sctKeyToUse = []byte(rootOfTrust.SCTPublicKey)
-	// }
-	// sctKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
-	// fmt.Println(string(sctKeyToUse))
-	// if err := sctKeyCollection.AddTransparencyLogPubKey(sctKeyToUse, tuf.Active); err != nil {
-	// 	return fmt.Errorf("could not add sct public key to collection: %w", err)
-	// }
-	// cosignOptions.CTLogPubKeys = &sctKeyCollection
-
-	// sct pub keys
-	if rootOfTrust.SCTPublicKey != "" {
-		sctPubKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
-		if err := sctPubKeyCollection.AddTransparencyLogPubKey([]byte(rootOfTrust.SCTPublicKey), tuf.Active); err != nil {
-			return fmt.Errorf("could not add custom sct public key to collection: %w", err)
-		}
-		cosignOptions.CTLogPubKeys = &sctPubKeyCollection
-	} else {
-		cosignOptions.CTLogPubKeys, err = cosign.GetCTLogPubs(ctx)
+	// sct public key(s)
+	var sctKeysToUse [][]byte
+	if rootOfTrust.SCTPublicKey == "" {
+		sctKeysToUse, err = GetPublicRootOfTrustSCTKeys(proxy)
 		if err != nil {
-			return fmt.Errorf("error retrieving default CT log public keys: %s", err.Error())
+			return fmt.Errorf("error retrieving public root of trust sct key(s): %s", err.Error())
+		}
+	} else {
+		sctKeysToUse = append(sctKeysToUse, []byte(rootOfTrust.SCTPublicKey))
+	}
+	sctKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
+	for _, key := range sctKeysToUse {
+		if err := sctKeyCollection.AddTransparencyLogPubKey(key, tuf.Active); err != nil {
+			return fmt.Errorf("could not add sct public key to collection: %w", err)
 		}
 	}
+	cosignOptions.CTLogPubKeys = &sctKeyCollection
+
 	return nil
 }
 

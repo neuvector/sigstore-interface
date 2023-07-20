@@ -64,10 +64,26 @@ type SignatureData struct {
 
 var configFilePath = flag.String("config-file", "", "path to the config file with target image digest, root of trust, signature, and verifier data")
 
-// temporary fields for testing purposes
 var proxyURL = flag.String("proxy-url", "", "")
-var proxyUsername = flag.String("proxy-username", "", "")
-var proxyPassword = flag.String("proxy-password", "", "")
+var proxyHasCredentials = flag.Bool("proxy-has-credentials", false, "")
+
+func getProxyDetails() (Proxy, error) {
+	proxy := Proxy{URL: *proxyURL}
+	if *proxyURL != "" && *proxyHasCredentials {
+		fmt.Println("getting proxy credential details")
+		stdinCredentials, err := os.ReadFile(os.Stdin.Name())
+		if err != nil {
+			return Proxy{}, fmt.Errorf("error when reading credentials, could not read stdin: %s", err.Error())
+		}
+		splitCredentials := strings.Split(string(stdinCredentials), ":")
+		if len(splitCredentials) != 2 {
+			return Proxy{}, fmt.Errorf("error when reading credentials, invalid format, credential string should have single colon (USERNAME:PASSWORD)")
+		}
+		proxy.Username = splitCredentials[0]
+		proxy.Password = splitCredentials[1]
+	}
+	return proxy, nil
+}
 
 func main() {
 	flag.Parse()
@@ -76,10 +92,9 @@ func main() {
 		log.Fatalf("ERROR: error loading config: %s", err.Error())
 	}
 
-	proxy := Proxy{
-		URL:      *proxyURL,
-		Username: *proxyUsername,
-		Password: *proxyPassword,
+	proxy, err := getProxyDetails()
+	if err != nil {
+		log.Fatalf("ERROR: error when getting proxy details: %s", err.Error())
 	}
 
 	imageDigestHash, err := v1.NewHash(config.ImageDigest)

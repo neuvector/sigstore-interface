@@ -14,7 +14,7 @@ type Proxy struct {
 }
 
 func (p Proxy) HasAuthorizationCredentials() bool {
-	return p.Username != "" && p.Password != ""
+	return p.Username != ""
 }
 
 func (p Proxy) BasicAuthorizationHeader() string {

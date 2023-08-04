@@ -68,19 +68,25 @@ var proxyURL = flag.String("proxy-url", "", "")
 var proxyHasCredentials = flag.Bool("proxy-has-credentials", false, "")
 
 func getProxyDetails() (Proxy, error) {
+	if *proxyURL == "" {
+		return Proxy{}, nil
+	}
 	proxy := Proxy{URL: *proxyURL}
-	if *proxyURL != "" && *proxyHasCredentials {
-		fmt.Println("getting proxy credential details")
+	if *proxyHasCredentials {
 		stdinCredentials, err := os.ReadFile(os.Stdin.Name())
 		if err != nil {
 			return Proxy{}, fmt.Errorf("error when reading credentials, could not read stdin: %s", err.Error())
 		}
-		splitCredentials := strings.Split(string(stdinCredentials), ":")
-		if len(splitCredentials) != 2 {
-			return Proxy{}, fmt.Errorf("error when reading credentials, invalid format, credential string should have single colon (USERNAME:PASSWORD)")
+		if len(stdinCredentials) == 0 {
+			return Proxy{}, fmt.Errorf("expecting credentials but received empty string")
 		}
+		separatorIndex := strings.Index(string(stdinCredentials), ":")
+		if separatorIndex == 0 {
+			return Proxy{}, fmt.Errorf("proxy credentials argument cannot start with colon, expecting USERNAME:PASSWORD")
+		}
+		splitCredentials := strings.Split(string(stdinCredentials), ":")
 		proxy.Username = splitCredentials[0]
-		proxy.Password = splitCredentials[1]
+		proxy.Password = strings.Join(splitCredentials[1:], "")
 	}
 	return proxy, nil
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	sigtuf "github.com/sigstore/sigstore/pkg/tuf"
 	tufclient "github.com/theupdateframework/go-tuf/client"
@@ -28,7 +29,10 @@ func GetTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error
 	var httpClient *http.Client
 	if proxy.URL != "" {
 		transport := proxy.HttpTransport()
-		httpClient = &http.Client{Transport: &transport}
+		httpClient = &http.Client{
+			Transport: &transport,
+			Timeout:   20 * time.Second,
+		}
 	}
 	remoteStore, err := tufclient.HTTPRemoteStore(sigtuf.DefaultRemoteRoot, nil, httpClient)
 	if err != nil {

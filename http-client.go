@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/base64"
 	"fmt"
 	"net/http"
@@ -29,6 +30,9 @@ func (p Proxy) HttpTransport() http.Transport {
 	}
 	transport := http.Transport{
 		Proxy: proxyURLFunc,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
 	}
 	if p.HasAuthorizationCredentials() {
 		transport.ProxyConnectHeader = http.Header{}

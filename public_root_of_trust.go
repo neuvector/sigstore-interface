@@ -26,13 +26,12 @@ func (d inMemoryDest) Delete() error {
 
 func GetTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error) {
 	// client initialization
-	var httpClient *http.Client
+	httpClient := &http.Client{
+		Timeout: 20 * time.Second,
+	}
 	if proxy.URL != "" {
 		transport := proxy.HttpTransport()
-		httpClient = &http.Client{
-			Transport: &transport,
-			Timeout:   20 * time.Second,
-		}
+		httpClient.Transport = &transport
 	}
 	remoteStore, err := tufclient.HTTPRemoteStore(sigtuf.DefaultRemoteRoot, nil, httpClient)
 	if err != nil {

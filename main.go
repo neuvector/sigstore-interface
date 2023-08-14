@@ -86,7 +86,7 @@ func getProxyDetails() (Proxy, error) {
 		}
 		splitCredentials := strings.Split(string(stdinCredentials), ":")
 		proxy.Username = splitCredentials[0]
-		proxy.Password = strings.Join(splitCredentials[1:], "")
+		proxy.Password = strings.Join(splitCredentials[1:], ":")
 	}
 	return proxy, nil
 }

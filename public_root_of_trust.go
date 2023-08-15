@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -32,6 +33,12 @@ func GetTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error
 	if proxy.URL != "" {
 		transport := proxy.HttpTransport()
 		httpClient.Transport = &transport
+	} else {
+		httpClient.Transport = &http.Transport{
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: true,
+			},
+		}
 	}
 	remoteStore, err := tufclient.HTTPRemoteStore(sigtuf.DefaultRemoteRoot, nil, httpClient)
 	if err != nil {

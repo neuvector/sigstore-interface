@@ -15,13 +15,12 @@ import (
 
 	v1 "github.com/google/go-containerregistry/pkg/v1"
 	"github.com/google/go-containerregistry/pkg/v1/static"
-	"github.com/sigstore/cosign/v2/cmd/cosign/cli/fulcio"
 	"github.com/sigstore/cosign/v2/pkg/cosign"
 	"github.com/sigstore/cosign/v2/pkg/oci"
 	"github.com/sigstore/cosign/v2/pkg/oci/signature"
 	sig "github.com/sigstore/cosign/v2/pkg/signature"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
-	"github.com/sigstore/sigstore/pkg/tuf"
+	sigtuf "github.com/sigstore/sigstore/pkg/tuf"
 )
 
 type Configuration struct {
@@ -63,10 +62,45 @@ type SignatureData struct {
 	Payloads map[string]string `json:"Payloads"`
 }
 
+var configFilePath = flag.String("config-file", "", "path to the config file with target image digest, root of trust, signature, and verifier data")
+
+var proxyURL = flag.String("proxy-url", "", "")
+var proxyHasCredentials = flag.Bool("proxy-has-credentials", false, "")
+
+func getProxyDetails() (Proxy, error) {
+	if *proxyURL == "" {
+		return Proxy{}, nil
+	}
+	proxy := Proxy{URL: *proxyURL}
+	if *proxyHasCredentials {
+		stdinCredentials, err := os.ReadFile(os.Stdin.Name())
+		if err != nil {
+			return Proxy{}, fmt.Errorf("error when reading credentials, could not read stdin: %s", err.Error())
+		}
+		if len(stdinCredentials) == 0 {
+			return Proxy{}, fmt.Errorf("expecting credentials but received empty string")
+		}
+		separatorIndex := strings.Index(string(stdinCredentials), ":")
+		if separatorIndex == 0 {
+			return Proxy{}, fmt.Errorf("proxy credentials argument cannot start with colon, expecting USERNAME:PASSWORD")
+		}
+		splitCredentials := strings.Split(string(stdinCredentials), ":")
+		proxy.Username = splitCredentials[0]
+		proxy.Password = strings.Join(splitCredentials[1:], ":")
+	}
+	return proxy, nil
+}
+
 func main() {
+	flag.Parse()
 	config, err := loadConfiguration()
 	if err != nil {
 		log.Fatalf("ERROR: error loading config: %s", err.Error())
+	}
+
+	proxy, err := getProxyDetails()
+	if err != nil {
+		log.Fatalf("ERROR: error when getting proxy details: %s", err.Error())
 	}
 
 	imageDigestHash, err := v1.NewHash(config.ImageDigest)
@@ -82,7 +116,7 @@ func main() {
 	allSatisfiedVerifiers := []string{}
 	for _, rootOfTrust := range config.RootsOfTrust {
 		fmt.Printf("\n>>>> checking root of trust: %s\n", rootOfTrust.Name)
-		satisfiedVerifiers, err := verify(imageDigestHash, rootOfTrust, signatures)
+		satisfiedVerifiers, err := verify(imageDigestHash, rootOfTrust, signatures, proxy)
 		if err != nil {
 			// line with prefix "ERROR: " is recognized by scanner for error encounted when verifying against a verifier
 			fmt.Printf("ERROR: %s\n", err.Error())
@@ -96,8 +130,6 @@ func main() {
 }
 
 func loadConfiguration() (config Configuration, err error) {
-	configFilePath := flag.String("config-file", "", "path to the config file with target image digest, root of trust, signature, and verifier data")
-	flag.Parse()
 	if *configFilePath == "" {
 		return config, errors.New("must provide --config-file flag")
 	}
@@ -126,10 +158,10 @@ func generateCosignSignatureObjects(sigData SignatureData) ([]oci.Signature, err
 	return signatures, nil
 }
 
-func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature) (satisfiedVerifiers []string, err error) {
+func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature, proxy Proxy) (satisfiedVerifiers []string, err error) {
 	ctx := context.Background()
 	cosignOptions := cosign.CheckOpts{ClaimVerifier: cosign.SimpleClaimVerifier}
-	err = setRootOfTrustCosignOptions(&cosignOptions, rootOfTrust, ctx)
+	err = setRootOfTrustCosignOptions(&cosignOptions, rootOfTrust, proxy, ctx)
 	if err != nil {
 		return satisfiedVerifiers, fmt.Errorf("could not set root of trust %s cosign check options: %s", rootOfTrust.Name, err.Error())
 	}
@@ -158,25 +190,31 @@ func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature) (s
 	return satisfiedVerifiers, nil
 }
 
-func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust RootOfTrust, ctx context.Context) (err error) {
-	// rekor pub keys
-	if rootOfTrust.RekorPublicKey != "" {
-		publicKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
-		if err := publicKeyCollection.AddTransparencyLogPubKey([]byte(rootOfTrust.RekorPublicKey), tuf.Active); err != nil {
-			return fmt.Errorf("could not add custom rekor public key to collection: %w", err)
-		}
-		cosignOptions.RekorPubKeys = &publicKeyCollection
-	} else {
-		cosignOptions.RekorPubKeys, err = cosign.GetRekorPubs(ctx)
+func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust RootOfTrust, proxy Proxy, ctx context.Context) (err error) {
+	// rekor public keys
+	rekorKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
+	if rootOfTrust.RekorPublicKey == "" {
+		rekorKeyTargets, err := GetTargets(sigtuf.Rekor, proxy)
 		if err != nil {
-			return fmt.Errorf("could not get default rekor public key: %w", err)
+			return fmt.Errorf("could not retrieve rekor tuf targets: %s", err.Error())
+		}
+		for _, rekorKeyTarget := range rekorKeyTargets {
+			if err := rekorKeyCollection.AddTransparencyLogPubKey(rekorKeyTarget.Target, rekorKeyTarget.Status); err != nil {
+				return fmt.Errorf("could not add public root of trust rekor public key to collection: %w", err)
+			}
+		}
+	} else {
+		if err := rekorKeyCollection.AddTransparencyLogPubKey([]byte(rootOfTrust.RekorPublicKey), sigtuf.Active); err != nil {
+			return fmt.Errorf("could not add custom root of trust rekor public key to collection: %w", err)
 		}
 	}
-	// root certificate(s)
+	cosignOptions.RekorPubKeys = &rekorKeyCollection
+
+	// root & intermediate certificates
+	selfSigned := func(cert *x509.Certificate) bool {
+		return bytes.Equal(cert.RawSubject, cert.RawIssuer)
+	}
 	if rootOfTrust.RootCert != "" {
-		selfSigned := func(cert *x509.Certificate) bool {
-			return bytes.Equal(cert.RawSubject, cert.RawIssuer)
-		}
 		rootPool := x509.NewCertPool()
 		var intermediatePool *x509.CertPool // should be nil if no intermediate certs are found
 		certs, err := cryptoutils.UnmarshalCertificatesFromPEM([]byte(rootOfTrust.RootCert))
@@ -196,28 +234,52 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 		cosignOptions.RootCerts = rootPool
 		cosignOptions.IntermediateCerts = intermediatePool
 	} else {
-		cosignOptions.RootCerts, err = fulcio.GetRoots()
+		targetCertificates, err := GetTargets(sigtuf.Fulcio, proxy)
+		// certificates, err := GetPublicRootOfTrustFulcioCertificates(proxy)
 		if err != nil {
-			return fmt.Errorf("could not fetch default fulcio root certificate(s): %s", err.Error())
+			return fmt.Errorf("could not retrieve public root of trust fulcio certificates: %s", err.Error())
 		}
-		cosignOptions.IntermediateCerts, err = fulcio.GetIntermediates()
-		if err != nil {
-			return fmt.Errorf("could not fetch default fulcio intermediate certificate(s): %s", err.Error())
+		rootPool := x509.NewCertPool()
+		var intermediatePool *x509.CertPool // should be nil if no intermediate certs are found
+		for _, targetCertificate := range targetCertificates {
+			certs, err := cryptoutils.UnmarshalCertificatesFromPEM(targetCertificate.Target)
+			if err != nil {
+				continue
+			}
+			for _, cert := range certs {
+				if selfSigned(cert) {
+					rootPool.AddCert(cert)
+				} else {
+					if intermediatePool == nil {
+						intermediatePool = x509.NewCertPool()
+					}
+					intermediatePool.AddCert(cert)
+				}
+			}
 		}
+		cosignOptions.RootCerts = rootPool
+		cosignOptions.IntermediateCerts = intermediatePool
 	}
-	// sct pub keys
-	if rootOfTrust.SCTPublicKey != "" {
-		sctPubKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
-		if err := sctPubKeyCollection.AddTransparencyLogPubKey([]byte(rootOfTrust.SCTPublicKey), tuf.Active); err != nil {
-			return fmt.Errorf("could not add custom sct public key to collection: %w", err)
+
+	// sct public keys
+	sctKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
+	if rootOfTrust.SCTPublicKey == "" {
+		sctKeyTargets, err := GetTargets(sigtuf.CTFE, proxy)
+		if err != nil {
+			return fmt.Errorf("could not retrieve ctfe tuf targets: %s", err.Error())
 		}
-		cosignOptions.CTLogPubKeys = &sctPubKeyCollection
+		for _, sctKeyTarget := range sctKeyTargets {
+			if err := sctKeyCollection.AddTransparencyLogPubKey(sctKeyTarget.Target, sctKeyTarget.Status); err != nil {
+				return fmt.Errorf("could not add public root of trust sct public key to collection: %w", err)
+			}
+		}
 	} else {
-		cosignOptions.CTLogPubKeys, err = cosign.GetCTLogPubs(ctx)
-		if err != nil {
-			return fmt.Errorf("error retrieving default CT log public keys: %s", err.Error())
+		if err := sctKeyCollection.AddTransparencyLogPubKey([]byte(rootOfTrust.SCTPublicKey), sigtuf.Active); err != nil {
+			return fmt.Errorf("could not add custom root of trust sct public key to collection: %w", err)
 		}
 	}
+	cosignOptions.CTLogPubKeys = &sctKeyCollection
+
 	return nil
 }
 

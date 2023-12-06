@@ -4,7 +4,7 @@ BASE_IMAGE_TAG = latest
 BUILD_IMAGE_TAG = v1
 
 all:
-	env GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' -buildvcs=false .
+	go build -ldflags='-s -w' -buildvcs=false .
 
 binary:
 	@echo "Making $@ ..."

@@ -247,9 +247,8 @@ func (s *SearchService) CommitsByProject(pid interface{}, query string, opt *Sea
 type Blob struct {
 	Basename  string `json:"basename"`
 	Data      string `json:"data"`
-	Path      string `json:"path"`
 	Filename  string `json:"filename"`
-	ID        string `json:"id"`
+	ID        int    `json:"id"`
 	Ref       string `json:"ref"`
 	Startline int    `json:"startline"`
 	ProjectID int    `json:"project_id"`

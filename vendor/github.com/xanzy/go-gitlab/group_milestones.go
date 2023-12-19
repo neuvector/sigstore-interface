@@ -87,7 +87,7 @@ func (s *GroupMilestonesService) ListGroupMilestones(gid interface{}, opt *ListG
 		return nil, resp, err
 	}
 
-	return m, resp, nil
+	return m, resp, err
 }
 
 // GetGroupMilestone gets a single group milestone.
@@ -112,7 +112,7 @@ func (s *GroupMilestonesService) GetGroupMilestone(gid interface{}, milestone in
 		return nil, resp, err
 	}
 
-	return m, resp, nil
+	return m, resp, err
 }
 
 // CreateGroupMilestoneOptions represents the available CreateGroupMilestone() options.
@@ -148,7 +148,7 @@ func (s *GroupMilestonesService) CreateGroupMilestone(gid interface{}, opt *Crea
 		return nil, resp, err
 	}
 
-	return m, resp, nil
+	return m, resp, err
 }
 
 // UpdateGroupMilestoneOptions represents the available UpdateGroupMilestone() options.
@@ -185,7 +185,7 @@ func (s *GroupMilestonesService) UpdateGroupMilestone(gid interface{}, milestone
 		return nil, resp, err
 	}
 
-	return m, resp, nil
+	return m, resp, err
 }
 
 // GetGroupMilestoneIssuesOptions represents the available GetGroupMilestoneIssues() options.
@@ -216,7 +216,7 @@ func (s *GroupMilestonesService) GetGroupMilestoneIssues(gid interface{}, milest
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // GetGroupMilestoneMergeRequestsOptions represents the available
@@ -249,7 +249,7 @@ func (s *GroupMilestonesService) GetGroupMilestoneMergeRequests(gid interface{},
 		return nil, resp, err
 	}
 
-	return mr, resp, nil
+	return mr, resp, err
 }
 
 // BurndownChartEvent reprensents a burnout chart event
@@ -292,5 +292,5 @@ func (s *GroupMilestonesService) GetGroupMilestoneBurndownChartEvents(gid interf
 		return nil, resp, err
 	}
 
-	return be, resp, nil
+	return be, resp, err
 }

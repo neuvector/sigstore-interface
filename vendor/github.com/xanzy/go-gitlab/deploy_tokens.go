@@ -62,7 +62,7 @@ func (s *DeployTokensService) ListAllDeployTokens(options ...RequestOptionFunc) 
 		return nil, resp, err
 	}
 
-	return ts, resp, nil
+	return ts, resp, err
 }
 
 // ListProjectDeployTokensOptions represents the available ListProjectDeployTokens()
@@ -94,7 +94,7 @@ func (s *DeployTokensService) ListProjectDeployTokens(pid interface{}, opt *List
 		return nil, resp, err
 	}
 
-	return ts, resp, nil
+	return ts, resp, err
 }
 
 // GetProjectDeployToken gets a single deploy token.
@@ -119,7 +119,7 @@ func (s *DeployTokensService) GetProjectDeployToken(pid interface{}, deployToken
 		return nil, resp, err
 	}
 
-	return t, resp, nil
+	return t, resp, err
 }
 
 // CreateProjectDeployTokenOptions represents the available CreateProjectDeployToken() options.
@@ -155,7 +155,7 @@ func (s *DeployTokensService) CreateProjectDeployToken(pid interface{}, opt *Cre
 		return nil, resp, err
 	}
 
-	return t, resp, nil
+	return t, resp, err
 }
 
 // DeleteProjectDeployToken removes a deploy token from the project.
@@ -206,7 +206,7 @@ func (s *DeployTokensService) ListGroupDeployTokens(gid interface{}, opt *ListGr
 		return nil, resp, err
 	}
 
-	return ts, resp, nil
+	return ts, resp, err
 }
 
 // GetGroupDeployToken gets a single deploy token.
@@ -231,7 +231,7 @@ func (s *DeployTokensService) GetGroupDeployToken(gid interface{}, deployToken i
 		return nil, resp, err
 	}
 
-	return t, resp, nil
+	return t, resp, err
 }
 
 // CreateGroupDeployTokenOptions represents the available CreateGroupDeployToken() options.
@@ -267,7 +267,7 @@ func (s *DeployTokensService) CreateGroupDeployToken(gid interface{}, opt *Creat
 		return nil, resp, err
 	}
 
-	return t, resp, nil
+	return t, resp, err
 }
 
 // DeleteGroupDeployToken removes a deploy token from the group.

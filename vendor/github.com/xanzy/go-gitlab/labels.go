@@ -102,7 +102,7 @@ func (s *LabelsService) ListLabels(pid interface{}, opt *ListLabelsOptions, opti
 		return nil, resp, err
 	}
 
-	return l, resp, nil
+	return l, resp, err
 }
 
 // GetLabel get a single label for a given project.
@@ -130,7 +130,7 @@ func (s *LabelsService) GetLabel(pid interface{}, labelID interface{}, options .
 		return nil, resp, err
 	}
 
-	return l, resp, nil
+	return l, resp, err
 }
 
 // CreateLabelOptions represents the available CreateLabel() options.
@@ -165,7 +165,7 @@ func (s *LabelsService) CreateLabel(pid interface{}, opt *CreateLabelOptions, op
 		return nil, resp, err
 	}
 
-	return l, resp, nil
+	return l, resp, err
 }
 
 // DeleteLabelOptions represents the available DeleteLabel() options.
@@ -226,7 +226,7 @@ func (s *LabelsService) UpdateLabel(pid interface{}, opt *UpdateLabelOptions, op
 		return nil, resp, err
 	}
 
-	return l, resp, nil
+	return l, resp, err
 }
 
 // SubscribeToLabel subscribes the authenticated user to a label to receive
@@ -257,7 +257,7 @@ func (s *LabelsService) SubscribeToLabel(pid interface{}, labelID interface{}, o
 		return nil, resp, err
 	}
 
-	return l, resp, nil
+	return l, resp, err
 }
 
 // UnsubscribeFromLabel unsubscribes the authenticated user from a label to not

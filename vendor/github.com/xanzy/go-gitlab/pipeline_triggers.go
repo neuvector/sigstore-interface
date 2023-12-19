@@ -73,7 +73,7 @@ func (s *PipelineTriggersService) ListPipelineTriggers(pid interface{}, opt *Lis
 		return nil, resp, err
 	}
 
-	return pt, resp, nil
+	return pt, resp, err
 }
 
 // GetPipelineTrigger gets a specific pipeline trigger for a project.
@@ -98,7 +98,7 @@ func (s *PipelineTriggersService) GetPipelineTrigger(pid interface{}, trigger in
 		return nil, resp, err
 	}
 
-	return pt, resp, nil
+	return pt, resp, err
 }
 
 // AddPipelineTriggerOptions represents the available AddPipelineTrigger() options.
@@ -131,7 +131,7 @@ func (s *PipelineTriggersService) AddPipelineTrigger(pid interface{}, opt *AddPi
 		return nil, resp, err
 	}
 
-	return pt, resp, nil
+	return pt, resp, err
 }
 
 // EditPipelineTriggerOptions represents the available EditPipelineTrigger() options.
@@ -164,7 +164,7 @@ func (s *PipelineTriggersService) EditPipelineTrigger(pid interface{}, trigger i
 		return nil, resp, err
 	}
 
-	return pt, resp, nil
+	return pt, resp, err
 }
 
 // TakeOwnershipOfPipelineTrigger sets the owner of the specified
@@ -190,7 +190,7 @@ func (s *PipelineTriggersService) TakeOwnershipOfPipelineTrigger(pid interface{}
 		return nil, resp, err
 	}
 
-	return pt, resp, nil
+	return pt, resp, err
 }
 
 // DeletePipelineTrigger removes a trigger from a project.
@@ -244,5 +244,5 @@ func (s *PipelineTriggersService) RunPipelineTrigger(pid interface{}, opt *RunPi
 		return nil, resp, err
 	}
 
-	return pt, resp, nil
+	return pt, resp, err
 }

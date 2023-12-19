@@ -50,7 +50,6 @@ type Group struct {
 	AvatarURL               string                     `json:"avatar_url"`
 	WebURL                  string                     `json:"web_url"`
 	RequestAccessEnabled    bool                       `json:"request_access_enabled"`
-	RepositoryStorage       string                     `json:"repository_storage"`
 	FullName                string                     `json:"full_name"`
 	FullPath                string                     `json:"full_path"`
 	FileTemplateProjectID   int                        `json:"file_template_project_id"`
@@ -68,7 +67,7 @@ type Group struct {
 	MentionsDisabled        bool                       `json:"mentions_disabled"`
 	RunnersToken            string                     `json:"runners_token"`
 	SharedProjects          []*Project                 `json:"shared_projects"`
-	SharedRunnersSetting    SharedRunnersSettingValue  `json:"shared_runners_setting"`
+	SharedRunnersEnabled    bool                       `json:"shared_runners_enabled"`
 	SharedWithGroups        []struct {
 		GroupID          int      `json:"group_id"`
 		GroupName        string   `json:"group_name"`
@@ -76,17 +75,16 @@ type Group struct {
 		GroupAccessLevel int      `json:"group_access_level"`
 		ExpiresAt        *ISOTime `json:"expires_at"`
 	} `json:"shared_with_groups"`
-	LDAPCN                         string             `json:"ldap_cn"`
-	LDAPAccess                     AccessLevelValue   `json:"ldap_access"`
-	LDAPGroupLinks                 []*LDAPGroupLink   `json:"ldap_group_links"`
-	SAMLGroupLinks                 []*SAMLGroupLink   `json:"saml_group_links"`
-	SharedRunnersMinutesLimit      int                `json:"shared_runners_minutes_limit"`
-	ExtraSharedRunnersMinutesLimit int                `json:"extra_shared_runners_minutes_limit"`
-	PreventForkingOutsideGroup     bool               `json:"prevent_forking_outside_group"`
-	MarkedForDeletionOn            *ISOTime           `json:"marked_for_deletion_on"`
-	CreatedAt                      *time.Time         `json:"created_at"`
-	IPRestrictionRanges            string             `json:"ip_restriction_ranges"`
-	WikiAccessLevel                AccessControlValue `json:"wiki_access_level"`
+	LDAPCN                         string           `json:"ldap_cn"`
+	LDAPAccess                     AccessLevelValue `json:"ldap_access"`
+	LDAPGroupLinks                 []*LDAPGroupLink `json:"ldap_group_links"`
+	SAMLGroupLinks                 []*SAMLGroupLink `json:"saml_group_links"`
+	SharedRunnersMinutesLimit      int              `json:"shared_runners_minutes_limit"`
+	ExtraSharedRunnersMinutesLimit int              `json:"extra_shared_runners_minutes_limit"`
+	PreventForkingOutsideGroup     bool             `json:"prevent_forking_outside_group"`
+	MarkedForDeletionOn            *ISOTime         `json:"marked_for_deletion_on"`
+	CreatedAt                      *time.Time       `json:"created_at"`
+	IPRestrictionRanges            string           `json:"ip_restriction_ranges"`
 }
 
 // GroupAvatar represents a GitLab group avatar.
@@ -129,17 +127,16 @@ type SAMLGroupLink struct {
 // GitLab API docs: https://docs.gitlab.com/ee/api/groups.html#list-groups
 type ListGroupsOptions struct {
 	ListOptions
-	SkipGroups           *[]int            `url:"skip_groups,omitempty" del:"," json:"skip_groups,omitempty"`
 	AllAvailable         *bool             `url:"all_available,omitempty" json:"all_available,omitempty"`
-	Search               *string           `url:"search,omitempty" json:"search,omitempty"`
+	MinAccessLevel       *AccessLevelValue `url:"min_access_level,omitempty" json:"min_access_level,omitempty"`
 	OrderBy              *string           `url:"order_by,omitempty" json:"order_by,omitempty"`
+	Owned                *bool             `url:"owned,omitempty" json:"owned,omitempty"`
+	Search               *string           `url:"search,omitempty" json:"search,omitempty"`
+	SkipGroups           *[]int            `url:"skip_groups,omitempty" del:"," json:"skip_groups,omitempty"`
 	Sort                 *string           `url:"sort,omitempty" json:"sort,omitempty"`
 	Statistics           *bool             `url:"statistics,omitempty" json:"statistics,omitempty"`
-	WithCustomAttributes *bool             `url:"with_custom_attributes,omitempty" json:"with_custom_attributes,omitempty"`
-	Owned                *bool             `url:"owned,omitempty" json:"owned,omitempty"`
-	MinAccessLevel       *AccessLevelValue `url:"min_access_level,omitempty" json:"min_access_level,omitempty"`
 	TopLevelOnly         *bool             `url:"top_level_only,omitempty" json:"top_level_only,omitempty"`
-	RepositoryStorage    *string           `url:"repository_storage,omitempty" json:"repository_storage,omitempty"`
+	WithCustomAttributes *bool             `url:"with_custom_attributes,omitempty" json:"with_custom_attributes,omitempty"`
 }
 
 // ListGroups gets a list of groups (as user: my groups, as admin: all groups).
@@ -158,7 +155,7 @@ func (s *GroupsService) ListGroups(opt *ListGroupsOptions, options ...RequestOpt
 		return nil, resp, err
 	}
 
-	return gs, resp, nil
+	return gs, resp, err
 }
 
 // ListSubGroupsOptions represents the available ListSubGroups() options.
@@ -189,7 +186,7 @@ func (s *GroupsService) ListSubGroups(gid interface{}, opt *ListSubGroupsOptions
 		return nil, resp, err
 	}
 
-	return gs, resp, nil
+	return gs, resp, err
 }
 
 // ListDescendantGroupsOptions represents the available ListDescendantGroups()
@@ -221,7 +218,7 @@ func (s *GroupsService) ListDescendantGroups(gid interface{}, opt *ListDescendan
 		return nil, resp, err
 	}
 
-	return gs, resp, nil
+	return gs, resp, err
 }
 
 // ListGroupProjectsOptions represents the available ListGroup() options.
@@ -270,7 +267,7 @@ func (s *GroupsService) ListGroupProjects(gid interface{}, opt *ListGroupProject
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // GetGroupOptions represents the available GetGroup() options.
@@ -303,7 +300,7 @@ func (s *GroupsService) GetGroup(gid interface{}, opt *GetGroupOptions, options 
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // DownloadAvatar downloads a group avatar.
@@ -356,7 +353,6 @@ type CreateGroupOptions struct {
 	SharedRunnersMinutesLimit      *int                        `url:"shared_runners_minutes_limit,omitempty" json:"shared_runners_minutes_limit,omitempty"`
 	ExtraSharedRunnersMinutesLimit *int                        `url:"extra_shared_runners_minutes_limit,omitempty" json:"extra_shared_runners_minutes_limit,omitempty"`
 	IPRestrictionRanges            *string                     `url:"ip_restriction_ranges,omitempty" json:"ip_restriction_ranges,omitempty"`
-	WikiAccessLevel                *AccessControlValue         `url:"wiki_access_level,omitempty" json:"wiki_access_level,omitempty"`
 }
 
 // CreateGroup creates a new project group. Available only for users who can
@@ -390,7 +386,7 @@ func (s *GroupsService) CreateGroup(opt *CreateGroupOptions, options ...RequestO
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // TransferGroup transfers a project to the Group namespace. Available only
@@ -420,7 +416,7 @@ func (s *GroupsService) TransferGroup(gid interface{}, pid interface{}, options 
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // TransferSubGroupOptions represents the available TransferSubGroup() options.
@@ -454,7 +450,7 @@ func (s *GroupsService) TransferSubGroup(gid interface{}, opt *TransferSubGroupO
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // UpdateGroupOptions represents the available UpdateGroup() options.
@@ -485,7 +481,6 @@ type UpdateGroupOptions struct {
 	SharedRunnersSetting                 *SharedRunnersSettingValue  `url:"shared_runners_setting,omitempty" json:"shared_runners_setting,omitempty"`
 	PreventSharingGroupsOutsideHierarchy *bool                       `url:"prevent_sharing_groups_outside_hierarchy,omitempty" json:"prevent_sharing_groups_outside_hierarchy,omitempty"`
 	IPRestrictionRanges                  *string                     `url:"ip_restriction_ranges,omitempty" json:"ip_restriction_ranges,omitempty"`
-	WikiAccessLevel                      *AccessControlValue         `url:"wiki_access_level,omitempty" json:"wiki_access_level,omitempty"`
 }
 
 // UpdateGroup updates an existing group; only available to group owners and
@@ -524,7 +519,7 @@ func (s *GroupsService) UpdateGroup(gid interface{}, opt *UpdateGroupOptions, op
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // UploadAvatar uploads a group avatar.
@@ -557,7 +552,7 @@ func (s *GroupsService) UploadAvatar(gid interface{}, avatar io.Reader, filename
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // DeleteGroup removes group with all projects inside.
@@ -623,7 +618,7 @@ func (s *GroupsService) SearchGroup(query string, options ...RequestOptionFunc) 
 		return nil, resp, err
 	}
 
-	return gs, resp, nil
+	return gs, resp, err
 }
 
 // ListProvisionedUsersOptions represents the available ListProvisionedUsers()
@@ -663,7 +658,7 @@ func (s *GroupsService) ListProvisionedUsers(gid interface{}, opt *ListProvision
 		return nil, resp, err
 	}
 
-	return us, resp, nil
+	return us, resp, err
 }
 
 // ListGroupLDAPLinks lists the group's LDAP links. Available only for users who
@@ -736,7 +731,7 @@ func (s *GroupsService) AddGroupLDAPLink(gid interface{}, opt *AddGroupLDAPLinkO
 		return nil, resp, err
 	}
 
-	return gl, resp, nil
+	return gl, resp, err
 }
 
 // DeleteGroupLDAPLink deletes a group LDAP link. Available only for users who
@@ -888,7 +883,7 @@ func (s *GroupsService) AddGroupSAMLLink(gid interface{}, opt *AddGroupSAMLLinkO
 		return nil, resp, err
 	}
 
-	return gl, resp, nil
+	return gl, resp, err
 }
 
 // DeleteGroupSAMLLink deletes a group SAML link. Available only for users who
@@ -943,7 +938,7 @@ func (s *GroupsService) ShareGroupWithGroup(gid interface{}, opt *ShareGroupWith
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // UnshareGroupFromGroup unshares a group from another group.
@@ -1007,7 +1002,7 @@ func (s *GroupsService) GetGroupPushRules(gid interface{}, options ...RequestOpt
 		return nil, resp, err
 	}
 
-	return gpr, resp, nil
+	return gpr, resp, err
 }
 
 // AddGroupPushRuleOptions represents the available AddGroupPushRule()
@@ -1051,7 +1046,7 @@ func (s *GroupsService) AddGroupPushRule(gid interface{}, opt *AddGroupPushRuleO
 		return nil, resp, err
 	}
 
-	return gpr, resp, nil
+	return gpr, resp, err
 }
 
 // EditGroupPushRuleOptions represents the available EditGroupPushRule()
@@ -1095,7 +1090,7 @@ func (s *GroupsService) EditGroupPushRule(gid interface{}, opt *EditGroupPushRul
 		return nil, resp, err
 	}
 
-	return gpr, resp, nil
+	return gpr, resp, err
 }
 
 // DeleteGroupPushRule deletes the push rules of a group.

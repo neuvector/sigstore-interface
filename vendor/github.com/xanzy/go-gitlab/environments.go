@@ -84,7 +84,7 @@ func (s *EnvironmentsService) ListEnvironments(pid interface{}, opts *ListEnviro
 		return nil, resp, err
 	}
 
-	return envs, resp, nil
+	return envs, resp, err
 }
 
 // GetEnvironment gets a specific environment from a project.
@@ -109,7 +109,7 @@ func (s *EnvironmentsService) GetEnvironment(pid interface{}, environment int, o
 		return nil, resp, err
 	}
 
-	return env, resp, nil
+	return env, resp, err
 }
 
 // CreateEnvironmentOptions represents the available CreateEnvironment() options.
@@ -147,7 +147,7 @@ func (s *EnvironmentsService) CreateEnvironment(pid interface{}, opt *CreateEnvi
 		return nil, resp, err
 	}
 
-	return env, resp, nil
+	return env, resp, err
 }
 
 // EditEnvironmentOptions represents the available EditEnvironment() options.
@@ -182,7 +182,7 @@ func (s *EnvironmentsService) EditEnvironment(pid interface{}, environment int, 
 		return nil, resp, err
 	}
 
-	return env, resp, nil
+	return env, resp, err
 }
 
 // DeleteEnvironment removes an environment from a project team.
@@ -208,23 +208,17 @@ func (s *EnvironmentsService) DeleteEnvironment(pid interface{}, environment int
 //
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/environments.html#stop-an-environment
-func (s *EnvironmentsService) StopEnvironment(pid interface{}, environmentID int, options ...RequestOptionFunc) (*Environment, *Response, error) {
+func (s *EnvironmentsService) StopEnvironment(pid interface{}, environmentID int, options ...RequestOptionFunc) (*Response, error) {
 	project, err := parseID(pid)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	u := fmt.Sprintf("projects/%s/environments/%d/stop", PathEscape(project), environmentID)
 
 	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
-	env := new(Environment)
-	resp, err := s.client.Do(req, env)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return env, resp, nil
+	return s.client.Do(req, nil)
 }

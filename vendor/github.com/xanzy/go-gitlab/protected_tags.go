@@ -44,7 +44,6 @@ type ProtectedTag struct {
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/protected_tags.html
 type TagAccessDescription struct {
-	ID                     int              `json:"id"`
 	UserID                 int              `json:"user_id"`
 	GroupID                int              `json:"group_id"`
 	AccessLevel            AccessLevelValue `json:"access_level"`
@@ -80,7 +79,7 @@ func (s *ProtectedTagsService) ListProtectedTags(pid interface{}, opt *ListProte
 		return nil, resp, err
 	}
 
-	return pts, resp, nil
+	return pts, resp, err
 }
 
 // GetProtectedTag returns a single protected tag or wildcard protected tag.
@@ -105,7 +104,7 @@ func (s *ProtectedTagsService) GetProtectedTag(pid interface{}, tag string, opti
 		return nil, resp, err
 	}
 
-	return pt, resp, nil
+	return pt, resp, err
 }
 
 // ProtectRepositoryTagsOptions represents the available ProtectRepositoryTags()
@@ -152,7 +151,7 @@ func (s *ProtectedTagsService) ProtectRepositoryTags(pid interface{}, opt *Prote
 		return nil, resp, err
 	}
 
-	return pt, resp, nil
+	return pt, resp, err
 }
 
 // UnprotectRepositoryTags unprotects the given protected tag or wildcard

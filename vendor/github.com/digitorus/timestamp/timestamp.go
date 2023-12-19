@@ -23,8 +23,8 @@ import (
 type FailureInfo int
 
 const (
-	// UnknownFailureInfo mean that no known failure info was provided
-	UnknownFailureInfo FailureInfo = -1
+	// UnkownFailureInfo mean that no known failure info was provided
+	UnkownFailureInfo FailureInfo = -1
 	// BadAlgorithm defines an unrecognized or unsupported Algorithm Identifier
 	BadAlgorithm FailureInfo = 0
 	// BadRequest indicates that the transaction not permitted or supported
@@ -268,7 +268,7 @@ func ParseResponse(bytes []byte) (*Timestamp, error) {
 	if resp.Status.Status > 0 {
 		var fis string
 		fi := resp.Status.FailureInfo()
-		if fi != UnknownFailureInfo {
+		if fi != UnkownFailureInfo {
 			fis = fi.String()
 		}
 		return nil, fmt.Errorf("%s: %s (%v)",
@@ -405,12 +405,12 @@ func CreateRequest(r io.Reader, opts *RequestOptions) ([]byte, error) {
 	return req.Marshal()
 }
 
-// CreateResponseWithOpts returns a DER-encoded timestamp response with the specified contents.
+// CreateResponse returns a DER-encoded timestamp response with the specified contents.
 // The fields in the response are populated as follows:
 //
 // The responder cert is used to populate the responder's name field, and the
 // certificate itself is provided alongside the timestamp response signature.
-func (t *Timestamp) CreateResponseWithOpts(signingCert *x509.Certificate, priv crypto.Signer, opts crypto.SignerOpts) ([]byte, error) {
+func (t *Timestamp) CreateResponse(signingCert *x509.Certificate, priv crypto.Signer) ([]byte, error) {
 	messageImprint := getMessageImprint(t.HashAlgorithm, t.HashedMessage)
 
 	tsaSerialNumber, err := generateTSASerialNumber()
@@ -421,7 +421,7 @@ func (t *Timestamp) CreateResponseWithOpts(signingCert *x509.Certificate, priv c
 	if err != nil {
 		return nil, err
 	}
-	signature, err := t.generateSignedData(tstInfo, priv, signingCert, opts)
+	signature, err := t.generateSignedData(tstInfo, priv, signingCert)
 	if err != nil {
 		return nil, err
 	}
@@ -436,19 +436,6 @@ func (t *Timestamp) CreateResponseWithOpts(signingCert *x509.Certificate, priv c
 		return nil, err
 	}
 	return tspResponseBytes, nil
-}
-
-// CreateResponse returns a DER-encoded timestamp response with the specified contents.
-// The fields in the response are populated as follows:
-//
-// The responder cert is used to populate the responder's name field, and the
-// certificate itself is provided alongside the timestamp response signature.
-//
-// This function is equivalent to CreateResponseWithOpts, using a SHA256 hash.
-//
-// Deprecated: Use CreateResponseWithOpts instead.
-func (t *Timestamp) CreateResponse(signingCert *x509.Certificate, priv crypto.Signer) ([]byte, error) {
-	return t.CreateResponseWithOpts(signingCert, priv, crypto.SHA256)
 }
 
 // CreateErrorResponse is used to create response other than granted and granted with mod status
@@ -566,7 +553,7 @@ func (t *Timestamp) populateSigningCertificateV2Ext(certificate *x509.Certificat
 		return nil, x509.ErrUnsupportedAlgorithm
 	}
 	if t.HashAlgorithm.HashFunc() == crypto.SHA1 {
-		return nil, fmt.Errorf("for SHA1 use ESSCertID instead of ESSCertIDv2")
+		return nil, fmt.Errorf("for SHA1 usae ESSCertID instead of ESSCertIDv2")
 	}
 
 	h := t.HashAlgorithm.HashFunc().New()
@@ -604,33 +591,12 @@ func (t *Timestamp) populateSigningCertificateV2Ext(certificate *x509.Certificat
 	return signingCertV2Bytes, nil
 }
 
-// digestAlgorithmToOID converts the hash func to the corresponding OID.
-// This should have parity with [pkcs7.getHashForOID].
-func digestAlgorithmToOID(hash crypto.Hash) (asn1.ObjectIdentifier, error) {
-	switch hash {
-	case crypto.SHA1:
-		return pkcs7.OIDDigestAlgorithmSHA1, nil
-	case crypto.SHA256:
-		return pkcs7.OIDDigestAlgorithmSHA256, nil
-	case crypto.SHA384:
-		return pkcs7.OIDDigestAlgorithmSHA384, nil
-	case crypto.SHA512:
-		return pkcs7.OIDDigestAlgorithmSHA512, nil
-	}
-	return nil, pkcs7.ErrUnsupportedAlgorithm
-}
-
-func (t *Timestamp) generateSignedData(tstInfo []byte, signer crypto.Signer, certificate *x509.Certificate, opts crypto.SignerOpts) ([]byte, error) {
+func (t *Timestamp) generateSignedData(tstInfo []byte, signer crypto.Signer, certificate *x509.Certificate) ([]byte, error) {
 	signedData, err := pkcs7.NewSignedData(tstInfo)
 	if err != nil {
 		return nil, err
 	}
-
-	alg, err := digestAlgorithmToOID(opts.HashFunc())
-	if err != nil {
-		return nil, err
-	}
-	signedData.SetDigestAlgorithm(alg)
+	signedData.SetDigestAlgorithm(pkcs7.OIDDigestAlgorithmSHA256)
 	signedData.SetContentType(asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 16, 1, 4})
 
 	signingCertV2Bytes, err := t.populateSigningCertificateV2Ext(certificate)
@@ -650,11 +616,7 @@ func (t *Timestamp) generateSignedData(tstInfo []byte, signer crypto.Signer, cer
 		signerInfoConfig.SkipCertificates = true
 	}
 
-	if len(t.Certificates) > 0 {
-		err = signedData.AddSignerChain(certificate, signer, t.Certificates, signerInfoConfig)
-	} else {
-		err = signedData.AddSigner(certificate, signer, signerInfoConfig)
-	}
+	err = signedData.AddSigner(certificate, signer, signerInfoConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -666,7 +628,7 @@ func (t *Timestamp) generateSignedData(tstInfo []byte, signer crypto.Signer, cer
 	return signature, nil
 }
 
-// copied from crypto/x509 package
+// copied from cryto/x509 package
 // oidNotInExtensions reports whether an extension with the given oid exists in
 // extensions.
 func oidInExtensions(oid asn1.ObjectIdentifier, extensions []pkix.Extension) bool {

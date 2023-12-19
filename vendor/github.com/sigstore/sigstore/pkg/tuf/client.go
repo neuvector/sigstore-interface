@@ -37,6 +37,7 @@ import (
 	"github.com/theupdateframework/go-tuf/client"
 	tuf_leveldbstore "github.com/theupdateframework/go-tuf/client/leveldbstore"
 	"github.com/theupdateframework/go-tuf/data"
+	_ "github.com/theupdateframework/go-tuf/pkg/deprecated/set_ecdsa"
 	"github.com/theupdateframework/go-tuf/util"
 )
 
@@ -369,17 +370,15 @@ func Initialize(_ context.Context, mirror string, root []byte) error {
 }
 
 // Checks if the testTarget matches the valid target file metadata.
-func isValidTarget(testTarget []byte, validMeta data.TargetFileMeta) (bool, error) {
-	localMeta, err := util.GenerateTargetFileMeta(
-		bytes.NewReader(testTarget),
-		"sha256", "sha512")
+func isValidTarget(testTarget []byte, validMeta data.TargetFileMeta) bool {
+	localMeta, err := util.GenerateTargetFileMeta(bytes.NewReader(testTarget))
 	if err != nil {
-		return false, err
+		return false
 	}
 	if err := util.TargetFileMetaEqual(localMeta, validMeta); err != nil {
-		return false, err
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func (t *TUF) GetTarget(name string) ([]byte, error) {
@@ -395,8 +394,8 @@ func (t *TUF) GetTarget(name string) ([]byte, error) {
 		return nil, err
 	}
 
-	if valid, err := isValidTarget(targetBytes, validMeta); !valid {
-		return nil, fmt.Errorf("cache contains invalid target; local cache may be corrupt: %w", err)
+	if !isValidTarget(targetBytes, validMeta) {
+		return nil, fmt.Errorf("cache contains invalid target; local cache may be corrupt")
 	}
 
 	return targetBytes, nil
@@ -541,7 +540,7 @@ func maybeDownloadRemoteTarget(name string, meta data.TargetFileMeta, t *TUF) er
 	// If we already have the target locally, don't bother downloading from remote storage.
 	if cachedTarget, err := t.targets.Get(name); err == nil {
 		// If the target we have stored matches the meta, use that.
-		if valid, _ := isValidTarget(cachedTarget, meta); valid {
+		if isValidTarget(cachedTarget, meta) {
 			return nil
 		}
 	}
@@ -562,7 +561,7 @@ func maybeDownloadRemoteTarget(name string, meta data.TargetFileMeta, t *TUF) er
 			b = bytes.ReplaceAll(b, []byte("\r\n"), []byte("\n"))
 		}
 
-		if valid, _ := isValidTarget(b, meta); valid {
+		if isValidTarget(b, meta) {
 			if _, err := io.Copy(&w, bytes.NewReader(b)); err != nil {
 				return fmt.Errorf("using embedded target: %w", err)
 			}

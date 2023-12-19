@@ -26,6 +26,11 @@ import (
 	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
 )
 
+type tags struct {
+	Name string   `json:"name"`
+	Tags []string `json:"tags"`
+}
+
 // ListWithContext calls List with the given context.
 //
 // Deprecated: Use List and WithContext. This will be removed in a future release.
@@ -40,61 +45,67 @@ func List(repo name.Repository, options ...Option) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newPuller(o).List(o.context, repo)
-}
+	f, err := makeFetcher(o.context, repo, o)
+	if err != nil {
+		return nil, err
+	}
 
-type Tags struct {
-	Name string   `json:"name"`
-	Tags []string `json:"tags"`
-	Next string   `json:"next,omitempty"`
-}
+	uri := &url.URL{
+		Scheme: repo.Registry.Scheme(),
+		Host:   repo.Registry.RegistryStr(),
+		Path:   fmt.Sprintf("/v2/%s/tags/list", repo.RepositoryStr()),
+	}
 
-func (f *fetcher) listPage(ctx context.Context, repo name.Repository, next string, pageSize int) (*Tags, error) {
-	if next == "" {
-		uri := &url.URL{
-			Scheme: repo.Scheme(),
-			Host:   repo.RegistryStr(),
-			Path:   fmt.Sprintf("/v2/%s/tags/list", repo.RepositoryStr()),
+	if o.pageSize > 0 {
+		uri.RawQuery = fmt.Sprintf("n=%d", o.pageSize)
+	}
+
+	tagList := []string{}
+	parsed := tags{}
+
+	// get responses until there is no next page
+	for {
+		select {
+		case <-o.context.Done():
+			return nil, o.context.Err()
+		default:
 		}
-		if pageSize > 0 {
-			uri.RawQuery = fmt.Sprintf("n=%d", pageSize)
+
+		req, err := http.NewRequestWithContext(o.context, "GET", uri.String(), nil)
+		if err != nil {
+			return nil, err
 		}
-		next = uri.String()
+
+		resp, err := f.client.Do(req)
+		if err != nil {
+			return nil, err
+		}
+
+		if err := transport.CheckError(resp, http.StatusOK); err != nil {
+			return nil, err
+		}
+
+		if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
+			return nil, err
+		}
+
+		if err := resp.Body.Close(); err != nil {
+			return nil, err
+		}
+
+		tagList = append(tagList, parsed.Tags...)
+
+		uri, err = getNextPageURL(resp)
+		if err != nil {
+			return nil, err
+		}
+		// no next page
+		if uri == nil {
+			break
+		}
 	}
 
-	req, err := http.NewRequestWithContext(ctx, "GET", next, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	resp, err := f.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := transport.CheckError(resp, http.StatusOK); err != nil {
-		return nil, err
-	}
-
-	parsed := Tags{}
-	if err := json.NewDecoder(resp.Body).Decode(&parsed); err != nil {
-		return nil, err
-	}
-
-	if err := resp.Body.Close(); err != nil {
-		return nil, err
-	}
-
-	uri, err := getNextPageURL(resp)
-	if err != nil {
-		return nil, err
-	}
-
-	if uri != nil {
-		parsed.Next = uri.String()
-	}
-
-	return &parsed, nil
+	return tagList, nil
 }
 
 // getNextPageURL checks if there is a Link header in a http.Response which
@@ -125,28 +136,4 @@ func getNextPageURL(resp *http.Response) (*url.URL, error) {
 	}
 	linkURL = resp.Request.URL.ResolveReference(linkURL)
 	return linkURL, nil
-}
-
-type Lister struct {
-	f        *fetcher
-	repo     name.Repository
-	pageSize int
-
-	page *Tags
-	err  error
-
-	needMore bool
-}
-
-func (l *Lister) Next(ctx context.Context) (*Tags, error) {
-	if l.needMore {
-		l.page, l.err = l.f.listPage(ctx, l.repo, l.page.Next, l.pageSize)
-	} else {
-		l.needMore = true
-	}
-	return l.page, l.err
-}
-
-func (l *Lister) HasNext() bool {
-	return l.page != nil && (!l.needMore || l.page.Next != "")
 }

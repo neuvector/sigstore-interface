@@ -40,7 +40,6 @@ type ProjectMirror struct {
 	LastSuccessfulUpdateAt *time.Time `json:"last_successful_update_at"`
 	LastUpdateAt           *time.Time `json:"last_update_at"`
 	LastUpdateStartedAt    *time.Time `json:"last_update_started_at"`
-	MirrorBranchRegex      string     `json:"mirror_branch_regex"`
 	OnlyProtectedBranches  bool       `json:"only_protected_branches"`
 	KeepDivergentRefs      bool       `json:"keep_divergent_refs"`
 	UpdateStatus           string     `json:"update_status"`
@@ -72,7 +71,7 @@ func (s *ProjectMirrorService) ListProjectMirror(pid interface{}, opt *ListProje
 		return nil, resp, err
 	}
 
-	return pm, resp, nil
+	return pm, resp, err
 }
 
 // GetProjectMirror gets a single mirror configured on the project.
@@ -97,7 +96,7 @@ func (s *ProjectMirrorService) GetProjectMirror(pid interface{}, mirror int, opt
 		return nil, resp, err
 	}
 
-	return pm, resp, nil
+	return pm, resp, err
 }
 
 // AddProjectMirrorOptions contains the properties requires to create
@@ -108,9 +107,8 @@ func (s *ProjectMirrorService) GetProjectMirror(pid interface{}, mirror int, opt
 type AddProjectMirrorOptions struct {
 	URL                   *string `url:"url,omitempty" json:"url,omitempty"`
 	Enabled               *bool   `url:"enabled,omitempty" json:"enabled,omitempty"`
-	KeepDivergentRefs     *bool   `url:"keep_divergent_refs,omitempty" json:"keep_divergent_refs,omitempty"`
 	OnlyProtectedBranches *bool   `url:"only_protected_branches,omitempty" json:"only_protected_branches,omitempty"`
-	MirrorBranchRegex     *string `url:"mirror_branch_regex,omitempty" json:"mirror_branch_regex,omitempty"`
+	KeepDivergentRefs     *bool   `url:"keep_divergent_refs,omitempty" json:"keep_divergent_refs,omitempty"`
 }
 
 // AddProjectMirror creates a new mirror on the project.
@@ -135,7 +133,7 @@ func (s *ProjectMirrorService) AddProjectMirror(pid interface{}, opt *AddProject
 		return nil, resp, err
 	}
 
-	return pm, resp, nil
+	return pm, resp, err
 }
 
 // EditProjectMirrorOptions contains the properties requires to edit
@@ -144,10 +142,9 @@ func (s *ProjectMirrorService) AddProjectMirror(pid interface{}, opt *AddProject
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/remote_mirrors.html#update-a-remote-mirrors-attributes
 type EditProjectMirrorOptions struct {
-	Enabled               *bool   `url:"enabled,omitempty" json:"enabled,omitempty"`
-	KeepDivergentRefs     *bool   `url:"keep_divergent_refs,omitempty" json:"keep_divergent_refs,omitempty"`
-	OnlyProtectedBranches *bool   `url:"only_protected_branches,omitempty" json:"only_protected_branches,omitempty"`
-	MirrorBranchRegex     *string `url:"mirror_branch_regex,omitempty" json:"mirror_branch_regex,omitempty"`
+	Enabled               *bool `url:"enabled,omitempty" json:"enabled,omitempty"`
+	OnlyProtectedBranches *bool `url:"only_protected_branches,omitempty" json:"only_protected_branches,omitempty"`
+	KeepDivergentRefs     *bool `url:"keep_divergent_refs,omitempty" json:"keep_divergent_refs,omitempty"`
 }
 
 // EditProjectMirror updates a project team member to a specified access level..
@@ -172,7 +169,7 @@ func (s *ProjectMirrorService) EditProjectMirror(pid interface{}, mirror int, op
 		return nil, resp, err
 	}
 
-	return pm, resp, nil
+	return pm, resp, err
 }
 
 // DeleteProjectMirror deletes a project mirror.

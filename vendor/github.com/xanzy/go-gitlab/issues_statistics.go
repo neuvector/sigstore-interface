@@ -87,7 +87,7 @@ func (s *IssuesStatisticsService) GetIssuesStatistics(opt *GetIssuesStatisticsOp
 		return nil, resp, err
 	}
 
-	return is, resp, nil
+	return is, resp, err
 }
 
 // GetGroupIssuesStatisticsOptions represents the available GetGroupIssuesStatistics()
@@ -135,7 +135,7 @@ func (s *IssuesStatisticsService) GetGroupIssuesStatistics(gid interface{}, opt 
 		return nil, resp, err
 	}
 
-	return is, resp, nil
+	return is, resp, err
 }
 
 // GetProjectIssuesStatisticsOptions represents the available
@@ -183,5 +183,5 @@ func (s *IssuesStatisticsService) GetProjectIssuesStatistics(pid interface{}, op
 		return nil, resp, err
 	}
 
-	return is, resp, nil
+	return is, resp, err
 }

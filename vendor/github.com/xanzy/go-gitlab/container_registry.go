@@ -102,7 +102,7 @@ func (s *ContainerRegistryService) ListProjectRegistryRepositories(pid interface
 		return nil, resp, err
 	}
 
-	return repos, resp, nil
+	return repos, resp, err
 }
 
 // ListGroupRegistryRepositories gets a list of registry repositories in a group.
@@ -127,7 +127,7 @@ func (s *ContainerRegistryService) ListGroupRegistryRepositories(gid interface{}
 		return nil, resp, err
 	}
 
-	return repos, resp, nil
+	return repos, resp, err
 }
 
 // GetSingleRegistryRepositoryOptions represents the available
@@ -162,7 +162,7 @@ func (s *ContainerRegistryService) GetSingleRegistryRepository(pid interface{}, 
 		return nil, resp, err
 	}
 
-	return repo, resp, nil
+	return repo, resp, err
 }
 
 // DeleteRegistryRepository deletes a repository in a registry.
@@ -216,7 +216,7 @@ func (s *ContainerRegistryService) ListRegistryRepositoryTags(pid interface{}, r
 		return nil, resp, err
 	}
 
-	return tags, resp, nil
+	return tags, resp, err
 }
 
 // GetRegistryRepositoryTagDetail get details of a registry repository tag
@@ -245,7 +245,7 @@ func (s *ContainerRegistryService) GetRegistryRepositoryTagDetail(pid interface{
 		return nil, resp, err
 	}
 
-	return tag, resp, nil
+	return tag, resp, err
 }
 
 // DeleteRegistryRepositoryTag deletes a registry repository tag.

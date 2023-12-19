@@ -88,7 +88,7 @@ func (s *RepositoryFilesService) GetFile(pid interface{}, fileName string, opt *
 		return nil, resp, err
 	}
 
-	return f, resp, nil
+	return f, resp, err
 }
 
 // GetFileMetaDataOptions represents the available GetFileMetaData() options.
@@ -144,7 +144,7 @@ func (s *RepositoryFilesService) GetFileMetaData(pid interface{}, fileName strin
 		}
 	}
 
-	return f, resp, nil
+	return f, resp, err
 }
 
 // FileBlameRange represents one item of blame information.
@@ -204,7 +204,7 @@ func (s *RepositoryFilesService) GetFileBlame(pid interface{}, file string, opt 
 		return nil, resp, err
 	}
 
-	return br, resp, nil
+	return br, resp, err
 }
 
 // GetRawFileOptions represents the available GetRawFile() options.
@@ -297,7 +297,7 @@ func (s *RepositoryFilesService) CreateFile(pid interface{}, fileName string, op
 		return nil, resp, err
 	}
 
-	return f, resp, nil
+	return f, resp, err
 }
 
 // UpdateFileOptions represents the available UpdateFile() options.
@@ -342,7 +342,7 @@ func (s *RepositoryFilesService) UpdateFile(pid interface{}, fileName string, op
 		return nil, resp, err
 	}
 
-	return f, resp, nil
+	return f, resp, err
 }
 
 // DeleteFileOptions represents the available DeleteFile() options.

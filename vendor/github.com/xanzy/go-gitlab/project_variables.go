@@ -83,7 +83,7 @@ func (s *ProjectVariablesService) ListVariables(pid interface{}, opt *ListProjec
 		return nil, resp, err
 	}
 
-	return vs, resp, nil
+	return vs, resp, err
 }
 
 // GetProjectVariableOptions represents the available GetVariable()
@@ -117,7 +117,7 @@ func (s *ProjectVariablesService) GetVariable(pid interface{}, key string, opt *
 		return nil, resp, err
 	}
 
-	return v, resp, nil
+	return v, resp, err
 }
 
 // CreateProjectVariableOptions represents the available CreateVariable()
@@ -157,7 +157,7 @@ func (s *ProjectVariablesService) CreateVariable(pid interface{}, opt *CreatePro
 		return nil, resp, err
 	}
 
-	return v, resp, nil
+	return v, resp, err
 }
 
 // UpdateProjectVariableOptions represents the available UpdateVariable()
@@ -197,7 +197,7 @@ func (s *ProjectVariablesService) UpdateVariable(pid interface{}, key string, op
 		return nil, resp, err
 	}
 
-	return v, resp, nil
+	return v, resp, err
 }
 
 // RemoveProjectVariableOptions represents the available RemoveVariable()

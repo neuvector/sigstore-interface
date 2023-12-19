@@ -70,7 +70,7 @@ func (s *CIYMLTemplatesService) ListAllTemplates(opt *ListCIYMLTemplatesOptions,
 		return nil, resp, err
 	}
 
-	return cts, resp, nil
+	return cts, resp, err
 }
 
 // GetTemplate get a single GitLab CI YML template.
@@ -91,5 +91,5 @@ func (s *CIYMLTemplatesService) GetTemplate(key string, options ...RequestOption
 		return nil, resp, err
 	}
 
-	return ct, resp, nil
+	return ct, resp, err
 }

@@ -73,7 +73,7 @@ func (s *InstanceVariablesService) ListVariables(opt *ListInstanceVariablesOptio
 		return nil, resp, err
 	}
 
-	return vs, resp, nil
+	return vs, resp, err
 }
 
 // GetVariable gets a variable.
@@ -94,7 +94,7 @@ func (s *InstanceVariablesService) GetVariable(key string, options ...RequestOpt
 		return nil, resp, err
 	}
 
-	return v, resp, nil
+	return v, resp, err
 }
 
 // CreateInstanceVariableOptions represents the available CreateVariable()
@@ -129,7 +129,7 @@ func (s *InstanceVariablesService) CreateVariable(opt *CreateInstanceVariableOpt
 		return nil, resp, err
 	}
 
-	return v, resp, nil
+	return v, resp, err
 }
 
 // UpdateInstanceVariableOptions represents the available UpdateVariable()
@@ -164,7 +164,7 @@ func (s *InstanceVariablesService) UpdateVariable(key string, opt *UpdateInstanc
 		return nil, resp, err
 	}
 
-	return v, resp, nil
+	return v, resp, err
 }
 
 // RemoveVariable removes an instance level CI variable.

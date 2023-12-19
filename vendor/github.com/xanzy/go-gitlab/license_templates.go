@@ -73,7 +73,7 @@ func (s *LicenseTemplatesService) ListLicenseTemplates(opt *ListLicenseTemplates
 		return nil, resp, err
 	}
 
-	return lts, resp, nil
+	return lts, resp, err
 }
 
 // GetLicenseTemplateOptions represents the available
@@ -105,5 +105,5 @@ func (s *LicenseTemplatesService) GetLicenseTemplate(template string, opt *GetLi
 		return nil, resp, err
 	}
 
-	return lt, resp, nil
+	return lt, resp, err
 }

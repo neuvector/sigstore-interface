@@ -45,7 +45,7 @@ func (s pkiStatusInfo) FailureInfo() FailureInfo {
 		}
 	}
 
-	return UnknownFailureInfo
+	return UnkownFailureInfo
 }
 
 // eContent within SignedData is TSTInfo

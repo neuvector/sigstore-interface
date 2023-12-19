@@ -258,7 +258,7 @@ func (s *IssuesService) ListIssues(opt *ListIssuesOptions, options ...RequestOpt
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // ListGroupIssuesOptions represents the available ListGroupIssues() options.
@@ -322,7 +322,7 @@ func (s *IssuesService) ListGroupIssues(pid interface{}, opt *ListGroupIssuesOpt
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // ListProjectIssuesOptions represents the available ListProjectIssues() options.
@@ -385,7 +385,7 @@ func (s *IssuesService) ListProjectIssues(pid interface{}, opt *ListProjectIssue
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // GetIssueByID gets a single issue.
@@ -405,7 +405,7 @@ func (s *IssuesService) GetIssueByID(issue int, options ...RequestOptionFunc) (*
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // GetIssue gets a single project issue.
@@ -429,7 +429,7 @@ func (s *IssuesService) GetIssue(pid interface{}, issue int, options ...RequestO
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // CreateIssueOptions represents the available CreateIssue() options.
@@ -445,7 +445,6 @@ type CreateIssueOptions struct {
 	Labels                             *Labels    `url:"labels,comma,omitempty" json:"labels,omitempty"`
 	CreatedAt                          *time.Time `url:"created_at,omitempty" json:"created_at,omitempty"`
 	DueDate                            *ISOTime   `url:"due_date,omitempty" json:"due_date,omitempty"`
-	EpicID                             *int       `url:"epic_id,omitempty" json:"epic_id,omitempty"`
 	MergeRequestToResolveDiscussionsOf *int       `url:"merge_request_to_resolve_discussions_of,omitempty" json:"merge_request_to_resolve_discussions_of,omitempty"`
 	DiscussionToResolve                *string    `url:"discussion_to_resolve,omitempty" json:"discussion_to_resolve,omitempty"`
 	Weight                             *int       `url:"weight,omitempty" json:"weight,omitempty"`
@@ -473,7 +472,7 @@ func (s *IssuesService) CreateIssue(pid interface{}, opt *CreateIssueOptions, op
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // UpdateIssueOptions represents the available UpdateIssue() options.
@@ -491,7 +490,6 @@ type UpdateIssueOptions struct {
 	StateEvent       *string    `url:"state_event,omitempty" json:"state_event,omitempty"`
 	UpdatedAt        *time.Time `url:"updated_at,omitempty" json:"updated_at,omitempty"`
 	DueDate          *ISOTime   `url:"due_date,omitempty" json:"due_date,omitempty"`
-	EpicID           *int       `url:"epic_id,omitempty" json:"epic_id,omitempty"`
 	Weight           *int       `url:"weight,omitempty" json:"weight,omitempty"`
 	DiscussionLocked *bool      `url:"discussion_locked,omitempty" json:"discussion_locked,omitempty"`
 	IssueType        *string    `url:"issue_type,omitempty" json:"issue_type,omitempty"`
@@ -519,7 +517,7 @@ func (s *IssuesService) UpdateIssue(pid interface{}, issue int, opt *UpdateIssue
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // DeleteIssue deletes a single project issue.
@@ -569,7 +567,7 @@ func (s *IssuesService) MoveIssue(pid interface{}, issue int, opt *MoveIssueOpti
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // SubscribeToIssue subscribes the authenticated user to the given issue to
@@ -596,7 +594,7 @@ func (s *IssuesService) SubscribeToIssue(pid interface{}, issue int, options ...
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // UnsubscribeFromIssue unsubscribes the authenticated user from the given
@@ -623,7 +621,7 @@ func (s *IssuesService) UnsubscribeFromIssue(pid interface{}, issue int, options
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // CreateTodo creates a todo for the current user for an issue.
@@ -650,7 +648,7 @@ func (s *IssuesService) CreateTodo(pid interface{}, issue int, options ...Reques
 		return nil, resp, err
 	}
 
-	return t, resp, nil
+	return t, resp, err
 }
 
 // ListMergeRequestsClosingIssueOptions represents the available
@@ -683,7 +681,7 @@ func (s *IssuesService) ListMergeRequestsClosingIssue(pid interface{}, issue int
 		return nil, resp, err
 	}
 
-	return m, resp, nil
+	return m, resp, err
 }
 
 // ListMergeRequestsRelatedToIssueOptions represents the available
@@ -719,7 +717,7 @@ func (s *IssuesService) ListMergeRequestsRelatedToIssue(pid interface{}, issue i
 		return nil, resp, err
 	}
 
-	return m, resp, nil
+	return m, resp, err
 }
 
 // SetTimeEstimate sets the time estimate for a single project issue.
@@ -784,5 +782,5 @@ func (s *IssuesService) GetParticipants(pid interface{}, issue int, options ...R
 		return nil, resp, err
 	}
 
-	return bu, resp, nil
+	return bu, resp, err
 }

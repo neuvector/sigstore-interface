@@ -90,7 +90,7 @@ func (s *ProjectFeatureFlagService) ListProjectFeatureFlags(pid interface{}, opt
 		return nil, resp, err
 	}
 
-	return pffs, resp, nil
+	return pffs, resp, err
 }
 
 // GetProjectFeatureFlag gets a single feature flag for the specified project.
@@ -115,7 +115,7 @@ func (s *ProjectFeatureFlagService) GetProjectFeatureFlag(pid interface{}, name 
 		return nil, resp, err
 	}
 
-	return flag, resp, nil
+	return flag, resp, err
 }
 
 // CreateProjectFeatureFlagOptions represents the available
@@ -177,7 +177,7 @@ func (s *ProjectFeatureFlagService) CreateProjectFeatureFlag(pid interface{}, op
 		return flag, resp, err
 	}
 
-	return flag, resp, nil
+	return flag, resp, err
 }
 
 // UpdateProjectFeatureFlagOptions represents the available
@@ -217,7 +217,7 @@ func (s *ProjectFeatureFlagService) UpdateProjectFeatureFlag(pid interface{}, na
 		return flag, resp, err
 	}
 
-	return flag, resp, nil
+	return flag, resp, err
 }
 
 // DeleteProjectFeatureFlag deletes a feature flag

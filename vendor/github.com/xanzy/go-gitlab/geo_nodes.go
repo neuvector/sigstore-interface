@@ -101,7 +101,7 @@ func (s *GeoNodesService) CreateGeoNode(opt *CreateGeoNodesOptions, options ...R
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // ListGeoNodesOptions represents the available ListGeoNodes() options.
@@ -126,7 +126,7 @@ func (s *GeoNodesService) ListGeoNodes(opt *ListGeoNodesOptions, options ...Requ
 		return nil, resp, err
 	}
 
-	return gs, resp, nil
+	return gs, resp, err
 }
 
 // GetGeoNode gets a specific geo node.
@@ -147,7 +147,7 @@ func (s *GeoNodesService) GetGeoNode(id int, options ...RequestOptionFunc) (*Geo
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // UpdateGeoNodesOptions represents the available EditGeoNode() options.
@@ -189,7 +189,7 @@ func (s *GeoNodesService) EditGeoNode(id int, opt *UpdateGeoNodesOptions, option
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // DeleteGeoNode removes the Geo node.
@@ -225,7 +225,7 @@ func (s *GeoNodesService) RepairGeoNode(id int, options ...RequestOptionFunc) (*
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }
 
 // GeoNodeStatus represents the status of Geo Node.
@@ -408,7 +408,7 @@ func (s *GeoNodesService) RetrieveStatusOfAllGeoNodes(options ...RequestOptionFu
 		return nil, resp, err
 	}
 
-	return gnss, resp, nil
+	return gnss, resp, err
 }
 
 // RetrieveStatusOfGeoNode get the of status of a specific Geo Nodes.
@@ -429,5 +429,5 @@ func (s *GeoNodesService) RetrieveStatusOfGeoNode(id int, options ...RequestOpti
 		return nil, resp, err
 	}
 
-	return gns, resp, nil
+	return gns, resp, err
 }

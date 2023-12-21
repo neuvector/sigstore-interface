@@ -76,7 +76,7 @@ func (s *PersonalAccessTokensService) ListPersonalAccessTokens(opt *ListPersonal
 		return nil, resp, err
 	}
 
-	return pats, resp, nil
+	return pats, resp, err
 }
 
 // GetSinglePersonalAccessTokenByID get a single personal access token by its ID.
@@ -96,7 +96,7 @@ func (s *PersonalAccessTokensService) GetSinglePersonalAccessTokenByID(user int,
 		return nil, resp, err
 	}
 
-	return pat, resp, nil
+	return pat, resp, err
 }
 
 // GetSinglePersonalAccessToken get a single personal access token by using
@@ -117,28 +117,7 @@ func (s *PersonalAccessTokensService) GetSinglePersonalAccessToken(options ...Re
 		return nil, resp, err
 	}
 
-	return pat, resp, nil
-}
-
-// RotatePersonalAccessToken revokes a token and returns a new token that
-// expires in one week.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/personal_access_tokens.html#rotate-a-personal-access-token
-func (s *PersonalAccessTokensService) RotatePersonalAccessToken(token int, options ...RequestOptionFunc) (*PersonalAccessToken, *Response, error) {
-	u := fmt.Sprintf("personal_access_tokens/%d/rotate", token)
-	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	pat := new(PersonalAccessToken)
-	resp, err := s.client.Do(req, pat)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return pat, resp, nil
+	return pat, resp, err
 }
 
 // RevokePersonalAccessToken revokes a personal access token.

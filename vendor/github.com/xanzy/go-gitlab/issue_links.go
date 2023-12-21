@@ -94,7 +94,7 @@ func (s *IssueLinksService) ListIssueRelations(pid interface{}, issue int, optio
 		return nil, resp, err
 	}
 
-	return is, resp, nil
+	return is, resp, err
 }
 
 // GetIssueLink gets a specific issue link.
@@ -119,7 +119,7 @@ func (s *IssueLinksService) GetIssueLink(pid interface{}, issue, issueLink int, 
 		return nil, resp, err
 	}
 
-	return il, resp, nil
+	return il, resp, err
 }
 
 // CreateIssueLinkOptions represents the available CreateIssueLink() options.
@@ -154,7 +154,7 @@ func (s *IssueLinksService) CreateIssueLink(pid interface{}, issue int, opt *Cre
 		return nil, resp, err
 	}
 
-	return i, resp, nil
+	return i, resp, err
 }
 
 // DeleteIssueLink deletes an issue link, thus removes the two-way relationship.
@@ -182,5 +182,5 @@ func (s *IssueLinksService) DeleteIssueLink(pid interface{}, issue, issueLink in
 		return nil, resp, err
 	}
 
-	return il, resp, nil
+	return il, resp, err
 }

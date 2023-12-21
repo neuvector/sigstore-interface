@@ -65,7 +65,7 @@ func (s *ApplicationsService) CreateApplication(opt *CreateApplicationOptions, o
 		return nil, resp, err
 	}
 
-	return a, resp, nil
+	return a, resp, err
 }
 
 // ListApplicationsOptions represents the available
@@ -87,7 +87,7 @@ func (s *ApplicationsService) ListApplications(opt *ListApplicationsOptions, opt
 		return nil, resp, err
 	}
 
-	return as, resp, nil
+	return as, resp, err
 }
 
 // DeleteApplication removes a specific application.

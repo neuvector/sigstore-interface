@@ -7,8 +7,7 @@
 // Package bson is a library for reading, writing, and manipulating BSON. BSON is a binary serialization format used to
 // store documents and make remote procedure calls in MongoDB. The BSON specification is located at https://bsonspec.org.
 // The BSON library handles marshalling and unmarshalling of values through a configurable codec system. For a description
-// of the codec system and examples of registering custom codecs, see the bsoncodec package. For additional information and
-// usage examples, check out the [Work with BSON] page in the Go Driver docs site.
+// of the codec system and examples of registering custom codecs, see the bsoncodec package.
 //
 // # Raw BSON
 //
@@ -139,6 +138,4 @@
 // # Marshalling and Unmarshalling
 //
 // Manually marshalling and unmarshalling can be done with the Marshal and Unmarshal family of functions.
-//
-// [Work with BSON]: https://www.mongodb.com/docs/drivers/go/current/fundamentals/bson/
 package bson

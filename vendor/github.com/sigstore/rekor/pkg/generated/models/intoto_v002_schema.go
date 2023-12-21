@@ -95,7 +95,6 @@ func (m *IntotoV002Schema) ContextValidate(ctx context.Context, formats strfmt.R
 func (m *IntotoV002Schema) contextValidateContent(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Content != nil {
-
 		if err := m.Content.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("content")
@@ -248,7 +247,6 @@ func (m *IntotoV002SchemaContent) ContextValidate(ctx context.Context, formats s
 func (m *IntotoV002SchemaContent) contextValidateEnvelope(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Envelope != nil {
-
 		if err := m.Envelope.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("content" + "." + "envelope")
@@ -265,11 +263,6 @@ func (m *IntotoV002SchemaContent) contextValidateEnvelope(ctx context.Context, f
 func (m *IntotoV002SchemaContent) contextValidateHash(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.Hash != nil {
-
-		if swag.IsZero(m.Hash) { // not required
-			return nil
-		}
-
 		if err := m.Hash.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("content" + "." + "hash")
@@ -286,11 +279,6 @@ func (m *IntotoV002SchemaContent) contextValidateHash(ctx context.Context, forma
 func (m *IntotoV002SchemaContent) contextValidatePayloadHash(ctx context.Context, formats strfmt.Registry) error {
 
 	if m.PayloadHash != nil {
-
-		if swag.IsZero(m.PayloadHash) { // not required
-			return nil
-		}
-
 		if err := m.PayloadHash.ContextValidate(ctx, formats); err != nil {
 			if ve, ok := err.(*errors.Validation); ok {
 				return ve.ValidateName("content" + "." + "payloadHash")
@@ -420,11 +408,6 @@ func (m *IntotoV002SchemaContentEnvelope) contextValidateSignatures(ctx context.
 	for i := 0; i < len(m.Signatures); i++ {
 
 		if m.Signatures[i] != nil {
-
-			if swag.IsZero(m.Signatures[i]) { // not required
-				return nil
-			}
-
 			if err := m.Signatures[i].ContextValidate(ctx, formats); err != nil {
 				if ve, ok := err.(*errors.Validation); ok {
 					return ve.ValidateName("content" + "." + "envelope" + "." + "signatures" + "." + strconv.Itoa(i))

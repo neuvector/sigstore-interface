@@ -140,7 +140,7 @@ func (s *PackagesService) ListProjectPackages(pid interface{}, opt *ListProjectP
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // ListGroupPackagesOptions represents the available ListGroupPackages()
@@ -181,7 +181,7 @@ func (s *PackagesService) ListGroupPackages(gid interface{}, opt *ListGroupPacka
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // ListPackageFilesOptions represents the available ListPackageFiles()
@@ -217,7 +217,7 @@ func (s *PackagesService) ListPackageFiles(pid interface{}, pkg int, opt *ListPa
 		return nil, resp, err
 	}
 
-	return pfs, resp, nil
+	return pfs, resp, err
 }
 
 // DeleteProjectPackage deletes a package in a project.

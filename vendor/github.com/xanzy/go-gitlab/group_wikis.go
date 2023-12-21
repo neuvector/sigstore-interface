@@ -75,7 +75,7 @@ func (s *GroupWikisService) ListGroupWikis(gid interface{}, opt *ListGroupWikisO
 		return nil, resp, err
 	}
 
-	return gws, resp, nil
+	return gws, resp, err
 }
 
 // GetGroupWikiPageOptions represents options to GetGroupWikiPage
@@ -109,7 +109,7 @@ func (s *GroupWikisService) GetGroupWikiPage(gid interface{}, slug string, opt *
 		return nil, resp, err
 	}
 
-	return gw, resp, nil
+	return gw, resp, err
 }
 
 // CreateGroupWikiPageOptions represents options to CreateGroupWikiPage.
@@ -145,7 +145,7 @@ func (s *GroupWikisService) CreateGroupWikiPage(gid interface{}, opt *CreateGrou
 		return nil, resp, err
 	}
 
-	return w, resp, nil
+	return w, resp, err
 }
 
 // EditGroupWikiPageOptions represents options to EditGroupWikiPage.
@@ -181,7 +181,7 @@ func (s *GroupWikisService) EditGroupWikiPage(gid interface{}, slug string, opt 
 		return nil, resp, err
 	}
 
-	return w, resp, nil
+	return w, resp, err
 }
 
 // DeleteGroupWikiPage deletes a wiki page with a given slug.

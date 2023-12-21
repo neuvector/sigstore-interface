@@ -57,7 +57,6 @@ type Snippet struct {
 		Path   string `json:"path"`
 		RawURL string `json:"raw_url"`
 	} `json:"files"`
-	RepositoryStorage string `json:"repository_storage"`
 }
 
 func (s Snippet) String() string {
@@ -86,7 +85,7 @@ func (s *SnippetsService) ListSnippets(opt *ListSnippetsOptions, options ...Requ
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // GetSnippet gets a single snippet
@@ -107,7 +106,7 @@ func (s *SnippetsService) GetSnippet(snippet int, options ...RequestOptionFunc) 
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // SnippetContent gets a single snippet’s raw contents.
@@ -192,7 +191,7 @@ func (s *SnippetsService) CreateSnippet(opt *CreateSnippetOptions, options ...Re
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // UpdateSnippetFileOptions represents the update snippet file options.
@@ -238,7 +237,7 @@ func (s *SnippetsService) UpdateSnippet(snippet int, opt *UpdateSnippetOptions, 
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // DeleteSnippet deletes an existing snippet. This is an idempotent
@@ -280,35 +279,5 @@ func (s *SnippetsService) ExploreSnippets(opt *ExploreSnippetsOptions, options .
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
-}
-
-// ListAllSnippetsOptions represents the available ListAllSnippets() options.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/snippets.html#list-all-snippets
-type ListAllSnippetsOptions struct {
-	ListOptions
-	CreatedAfter      *ISOTime `url:"created_after,omitempty" json:"created_after,omitempty"`
-	CreatedBefore     *ISOTime `url:"created_before,omitempty" json:"created_before,omitempty"`
-	RepositoryStorage *string  `url:"repository_storage,omitempty" json:"repository_storage,omitempty"`
-}
-
-// ListAllSnippets gets all snippets the current user has access to.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/snippets.html#list-all-snippets
-func (s *SnippetsService) ListAllSnippets(opt *ListAllSnippetsOptions, options ...RequestOptionFunc) ([]*Snippet, *Response, error) {
-	req, err := s.client.NewRequest(http.MethodGet, "snippets/all", opt, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	var ps []*Snippet
-	resp, err := s.client.Do(req, &ps)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return ps, resp, nil
+	return ps, resp, err
 }

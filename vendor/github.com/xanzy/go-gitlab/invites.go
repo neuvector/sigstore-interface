@@ -75,7 +75,7 @@ func (s *InvitesService) ListPendingGroupInvitations(gid interface{}, opt *ListP
 		return nil, resp, err
 	}
 
-	return pis, resp, nil
+	return pis, resp, err
 }
 
 // ListPendingProjectInvitations gets a list of invited project members.
@@ -100,7 +100,7 @@ func (s *InvitesService) ListPendingProjectInvitations(pid interface{}, opt *Lis
 		return nil, resp, err
 	}
 
-	return pis, resp, nil
+	return pis, resp, err
 }
 
 // InvitesOptions represents the available GroupInvites() and ProjectInvites()
@@ -147,7 +147,7 @@ func (s *InvitesService) GroupInvites(gid interface{}, opt *InvitesOptions, opti
 		return nil, resp, err
 	}
 
-	return ir, resp, nil
+	return ir, resp, err
 }
 
 // ProjectInvites invites new users by email to join a project.
@@ -172,5 +172,5 @@ func (s *InvitesService) ProjectInvites(pid interface{}, opt *InvitesOptions, op
 		return nil, resp, err
 	}
 
-	return ir, resp, nil
+	return ir, resp, err
 }

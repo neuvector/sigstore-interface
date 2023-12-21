@@ -75,7 +75,7 @@ func (s *GroupIssueBoardsService) ListGroupIssueBoards(gid interface{}, opt *Lis
 		return nil, resp, err
 	}
 
-	return gs, resp, nil
+	return gs, resp, err
 }
 
 // CreateGroupIssueBoardOptions represents the available
@@ -109,7 +109,7 @@ func (s *GroupIssueBoardsService) CreateGroupIssueBoard(gid interface{}, opt *Cr
 		return nil, resp, err
 	}
 
-	return gib, resp, nil
+	return gib, resp, err
 }
 
 // GetGroupIssueBoard gets a single issue board of a group.
@@ -134,7 +134,7 @@ func (s *GroupIssueBoardsService) GetGroupIssueBoard(gid interface{}, board int,
 		return nil, resp, err
 	}
 
-	return gib, resp, nil
+	return gib, resp, err
 }
 
 // UpdateGroupIssueBoardOptions represents a group issue board.
@@ -171,7 +171,7 @@ func (s *GroupIssueBoardsService) UpdateIssueBoard(gid interface{}, board int, o
 		return nil, resp, err
 	}
 
-	return gib, resp, nil
+	return gib, resp, err
 }
 
 // DeleteIssueBoard delete a single issue board of a group.
@@ -222,7 +222,7 @@ func (s *GroupIssueBoardsService) ListGroupIssueBoardLists(gid interface{}, boar
 		return nil, resp, err
 	}
 
-	return gbl, resp, nil
+	return gbl, resp, err
 }
 
 // GetGroupIssueBoardList gets a single issue board list.
@@ -251,7 +251,7 @@ func (s *GroupIssueBoardsService) GetGroupIssueBoardList(gid interface{}, board,
 		return nil, resp, err
 	}
 
-	return gbl, resp, nil
+	return gbl, resp, err
 }
 
 // CreateGroupIssueBoardListOptions represents the available
@@ -285,7 +285,7 @@ func (s *GroupIssueBoardsService) CreateGroupIssueBoardList(gid interface{}, boa
 		return nil, resp, err
 	}
 
-	return gbl, resp, nil
+	return gbl, resp, err
 }
 
 // UpdateGroupIssueBoardListOptions represents the available
@@ -324,7 +324,7 @@ func (s *GroupIssueBoardsService) UpdateIssueBoardList(gid interface{}, board, l
 		return nil, resp, err
 	}
 
-	return gbl, resp, nil
+	return gbl, resp, err
 }
 
 // DeleteGroupIssueBoardList soft deletes a group issue board list.

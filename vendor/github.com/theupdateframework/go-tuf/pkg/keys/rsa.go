@@ -17,11 +17,11 @@ import (
 )
 
 func init() {
-	VerifierMap.Store(data.KeyTypeRSASSA_PSS_SHA256, NewRsaVerifier)
+	VerifierMap.Store(data.KeyTypeRSASSA_PSS_SHA256, newRsaVerifier)
 	SignerMap.Store(data.KeyTypeRSASSA_PSS_SHA256, newRsaSigner)
 }
 
-func NewRsaVerifier() Verifier {
+func newRsaVerifier() Verifier {
 	return &rsaVerifier{}
 }
 

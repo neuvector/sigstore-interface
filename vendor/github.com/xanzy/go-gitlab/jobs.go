@@ -41,7 +41,6 @@ type Job struct {
 	CreatedAt         *time.Time `json:"created_at"`
 	StartedAt         *time.Time `json:"started_at"`
 	FinishedAt        *time.Time `json:"finished_at"`
-	ErasedAt          *time.Time `json:"erased_at"`
 	Duration          float64    `json:"duration"`
 	QueuedDuration    float64    `json:"queued_duration"`
 	ArtifactsExpireAt *time.Time `json:"artifacts_expire_at"`
@@ -92,16 +91,13 @@ type Bridge struct {
 	CreatedAt          *time.Time    `json:"created_at"`
 	StartedAt          *time.Time    `json:"started_at"`
 	FinishedAt         *time.Time    `json:"finished_at"`
-	ErasedAt           *time.Time    `json:"erased_at"`
 	Duration           float64       `json:"duration"`
-	QueuedDuration     float64       `json:"queued_duration"`
 	ID                 int           `json:"id"`
 	Name               string        `json:"name"`
 	Pipeline           PipelineInfo  `json:"pipeline"`
 	Ref                string        `json:"ref"`
 	Stage              string        `json:"stage"`
 	Status             string        `json:"status"`
-	FailureReason      string        `json:"failure_reason"`
 	Tag                bool          `json:"tag"`
 	WebURL             string        `json:"web_url"`
 	User               *User         `json:"user"`
@@ -143,7 +139,7 @@ func (s *JobsService) ListProjectJobs(pid interface{}, opts *ListJobsOptions, op
 		return nil, resp, err
 	}
 
-	return jobs, resp, nil
+	return jobs, resp, err
 }
 
 // ListPipelineJobs gets a list of jobs for specific pipeline in a
@@ -169,7 +165,7 @@ func (s *JobsService) ListPipelineJobs(pid interface{}, pipelineID int, opts *Li
 		return nil, resp, err
 	}
 
-	return jobs, resp, nil
+	return jobs, resp, err
 }
 
 // ListPipelineBridges gets a list of bridges for specific pipeline in a
@@ -195,7 +191,7 @@ func (s *JobsService) ListPipelineBridges(pid interface{}, pipelineID int, opts 
 		return nil, resp, err
 	}
 
-	return bridges, resp, nil
+	return bridges, resp, err
 }
 
 // GetJobTokensJobOptions represents the available GetJobTokensJob() options.
@@ -220,7 +216,7 @@ func (s *JobsService) GetJobTokensJob(opts *GetJobTokensJobOptions, options ...R
 		return nil, resp, err
 	}
 
-	return job, resp, nil
+	return job, resp, err
 }
 
 // GetJob gets a single job of a project.
@@ -245,7 +241,7 @@ func (s *JobsService) GetJob(pid interface{}, jobID int, options ...RequestOptio
 		return nil, resp, err
 	}
 
-	return job, resp, nil
+	return job, resp, err
 }
 
 // GetJobArtifacts get jobs artifacts of a project
@@ -423,7 +419,7 @@ func (s *JobsService) CancelJob(pid interface{}, jobID int, options ...RequestOp
 		return nil, resp, err
 	}
 
-	return job, resp, nil
+	return job, resp, err
 }
 
 // RetryJob retries a single job of a project
@@ -448,7 +444,7 @@ func (s *JobsService) RetryJob(pid interface{}, jobID int, options ...RequestOpt
 		return nil, resp, err
 	}
 
-	return job, resp, nil
+	return job, resp, err
 }
 
 // EraseJob erases a single job of a project, removes a job
@@ -474,7 +470,7 @@ func (s *JobsService) EraseJob(pid interface{}, jobID int, options ...RequestOpt
 		return nil, resp, err
 	}
 
-	return job, resp, nil
+	return job, resp, err
 }
 
 // KeepArtifacts prevents artifacts from being deleted when
@@ -500,7 +496,7 @@ func (s *JobsService) KeepArtifacts(pid interface{}, jobID int, options ...Reque
 		return nil, resp, err
 	}
 
-	return job, resp, nil
+	return job, resp, err
 }
 
 // PlayJobOptions represents the available PlayJob() options.
@@ -543,7 +539,7 @@ func (s *JobsService) PlayJob(pid interface{}, jobID int, opt *PlayJobOptions, o
 		return nil, resp, err
 	}
 
-	return job, resp, nil
+	return job, resp, err
 }
 
 // DeleteArtifacts delete artifacts of a job
@@ -556,25 +552,6 @@ func (s *JobsService) DeleteArtifacts(pid interface{}, jobID int, options ...Req
 		return nil, err
 	}
 	u := fmt.Sprintf("projects/%s/jobs/%d/artifacts", PathEscape(project), jobID)
-
-	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
-	if err != nil {
-		return nil, err
-	}
-
-	return s.client.Do(req, nil)
-}
-
-// DeleteProjectArtifacts delete artifacts eligible for deletion in a project
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/job_artifacts.html#delete-project-artifacts
-func (s *JobsService) DeleteProjectArtifacts(pid interface{}, options ...RequestOptionFunc) (*Response, error) {
-	project, err := parseID(pid)
-	if err != nil {
-		return nil, err
-	}
-	u := fmt.Sprintf("projects/%s/artifacts", PathEscape(project))
 
 	req, err := s.client.NewRequest(http.MethodDelete, u, nil, options)
 	if err != nil {

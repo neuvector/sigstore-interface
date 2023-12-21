@@ -35,7 +35,7 @@ The directories contain the following files:
 `go-tuf` is tested on Go versions 1.18.
 
 ```bash
-go install github.com/theupdateframework/go-tuf/cmd/tuf@latest
+go get github.com/theupdateframework/go-tuf/cmd/tuf
 ```
 
 ### Commands
@@ -48,15 +48,6 @@ This is only required if the repository should not generate consistent
 snapshots (i.e. by passing `--consistent-snapshot=false`). If consistent
 snapshots should be generated, the repository will be implicitly
 initialized to do so when generating keys.
-
-#### `tuf add-key [--scheme=<scheme>] [--expires=<days>] [--public-key=<path>] <role>`
-
-Adds a new signing key for the given role.
-
-The root metadata file will be staged
-with the addition of the key's ID to the role's list of key IDs.
-
-The public value can be specified as a path or passed in via stdin.
 
 #### `tuf gen-key [--expires=<days>] <role>`
 
@@ -154,12 +145,12 @@ Typically, `path` will be a file containing the output of `tuf payload`.
 
 See also `tuf add-signatures`.
 
-#### `tuf add-signatures [--signatures <sig_file>] [--format=<format>] [--key-id=<key-id>] <metadata>`
+#### `tuf add-signatures --signatures <sig_file> <metadata>`
+
 
 Adds signatures (the output of `tuf sign-payload`) to the given role metadata file.
 
-If the signature does not verify, it will not be added. Signature can be a json file
-or json passed in via `stdin`.
+If the signature does not verify, it will not be added.
 
 #### `tuf status --valid-at <date> <role>`
 
@@ -662,14 +653,3 @@ install tuf`). To update the data for these tests requires Docker and make (see
 test data [README.md](client/python_interop/testdata/README.md) for details).
 
 Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for contribution guidelines before making your first contribution!
-
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/...)
-
-Users wishing to use remote IDEs can also make use of [Gitpod](https://www.gitpod.io/) to make changes to this project.
-
-## Comparison to other implementations
-
-There are TUF implementations in a variety of programming languages. Some other Go implementations of TUF include:
-
-* [Notary](https://github.com/notaryproject/notary): A version of TUF designed specifically for publishing and managing trusted collections of content. It was used by Docker Content Trust, and has since been superseded by the [Notation](https://github.com/notaryproject/notation) project. In contrast, go-tuf is a direct implementation of TUF and has been updated to conform to 1.0.0 of the TUF specification.
-

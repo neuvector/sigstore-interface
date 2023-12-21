@@ -132,7 +132,7 @@ func (s *ProjectImportExportService) ExportStatus(pid interface{}, options ...Re
 		return nil, resp, err
 	}
 
-	return es, resp, nil
+	return es, resp, err
 }
 
 // ExportDownload download the finished export.
@@ -196,7 +196,7 @@ func (s *ProjectImportExportService) ImportFromFile(archive io.Reader, opt *Impo
 		return nil, resp, err
 	}
 
-	return is, resp, nil
+	return is, resp, err
 }
 
 // ImportStatus get the status of an import.
@@ -221,5 +221,5 @@ func (s *ProjectImportExportService) ImportStatus(pid interface{}, options ...Re
 		return nil, resp, err
 	}
 
-	return is, resp, nil
+	return is, resp, err
 }

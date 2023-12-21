@@ -81,7 +81,7 @@ func (s *ProjectAccessTokensService) ListProjectAccessTokens(pid interface{}, op
 		return nil, resp, err
 	}
 
-	return pats, resp, nil
+	return pats, resp, err
 }
 
 // GetProjectAccessToken gets a single project access tokens in a project.
@@ -106,7 +106,7 @@ func (s *ProjectAccessTokensService) GetProjectAccessToken(pid interface{}, id i
 		return nil, resp, err
 	}
 
-	return pat, resp, nil
+	return pat, resp, err
 }
 
 // CreateProjectAccessTokenOptions represents the available CreateVariable()
@@ -143,32 +143,7 @@ func (s *ProjectAccessTokensService) CreateProjectAccessToken(pid interface{}, o
 		return nil, resp, err
 	}
 
-	return pat, resp, nil
-}
-
-// RotateProjectAccessToken revokes a project access token and returns a new
-// project access token that expires in one week.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/project_access_tokens.html#rotate-a-project-access-token
-func (s *ProjectAccessTokensService) RotateProjectAccessToken(pid interface{}, id int, options ...RequestOptionFunc) (*ProjectAccessToken, *Response, error) {
-	projects, err := parseID(pid)
-	if err != nil {
-		return nil, nil, err
-	}
-	u := fmt.Sprintf("projects/%s/access_tokens/%d/rotate", PathEscape(projects), id)
-	req, err := s.client.NewRequest(http.MethodPost, u, nil, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	pat := new(ProjectAccessToken)
-	resp, err := s.client.Do(req, pat)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return pat, resp, nil
+	return pat, resp, err
 }
 
 // RevokeProjectAccessToken revokes a project access token.

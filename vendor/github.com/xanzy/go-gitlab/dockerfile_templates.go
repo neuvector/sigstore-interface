@@ -68,7 +68,7 @@ func (s *DockerfileTemplatesService) ListTemplates(opt *ListDockerfileTemplatesO
 		return nil, resp, err
 	}
 
-	return gs, resp, nil
+	return gs, resp, err
 }
 
 // GetTemplate get a single Dockerfile template.
@@ -89,5 +89,5 @@ func (s *DockerfileTemplatesService) GetTemplate(key string, options ...RequestO
 		return nil, resp, err
 	}
 
-	return g, resp, nil
+	return g, resp, err
 }

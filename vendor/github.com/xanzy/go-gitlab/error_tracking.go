@@ -81,7 +81,7 @@ func (s *ErrorTrackingService) GetErrorTrackingSettings(pid interface{}, options
 		return nil, resp, err
 	}
 
-	return ets, resp, nil
+	return ets, resp, err
 }
 
 // EnableDisableErrorTrackingOptions represents the available
@@ -117,7 +117,7 @@ func (s *ErrorTrackingService) EnableDisableErrorTracking(pid interface{}, opt *
 		return nil, resp, err
 	}
 
-	return ets, resp, nil
+	return ets, resp, err
 }
 
 // ListClientKeysOptions represents the available ListClientKeys() options.
@@ -148,7 +148,7 @@ func (s *ErrorTrackingService) ListClientKeys(pid interface{}, opt *ListClientKe
 		return nil, resp, err
 	}
 
-	return cks, resp, nil
+	return cks, resp, err
 }
 
 // CreateClientKey creates a new client key for a project.
@@ -173,7 +173,7 @@ func (s *ErrorTrackingService) CreateClientKey(pid interface{}, options ...Reque
 		return nil, resp, err
 	}
 
-	return ck, resp, nil
+	return ck, resp, err
 }
 
 // DeleteClientKey removes a client key from the project.

@@ -56,7 +56,7 @@ func (s *ProjectSnippetsService) ListSnippets(pid interface{}, opt *ListProjectS
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // GetSnippet gets a single project snippet
@@ -81,7 +81,7 @@ func (s *ProjectSnippetsService) GetSnippet(pid interface{}, snippet int, option
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // CreateProjectSnippetOptions represents the available CreateSnippet() options.
@@ -120,7 +120,7 @@ func (s *ProjectSnippetsService) CreateSnippet(pid interface{}, opt *CreateProje
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // UpdateProjectSnippetOptions represents the available UpdateSnippet() options.
@@ -159,7 +159,7 @@ func (s *ProjectSnippetsService) UpdateSnippet(pid interface{}, snippet int, opt
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // DeleteSnippet deletes an existing project snippet. This is an idempotent

@@ -35,27 +35,23 @@ type PipelineSchedulesService struct {
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/pipeline_schedules.html
 type PipelineSchedule struct {
-	ID           int                 `json:"id"`
-	Description  string              `json:"description"`
-	Ref          string              `json:"ref"`
-	Cron         string              `json:"cron"`
-	CronTimezone string              `json:"cron_timezone"`
-	NextRunAt    *time.Time          `json:"next_run_at"`
-	Active       bool                `json:"active"`
-	CreatedAt    *time.Time          `json:"created_at"`
-	UpdatedAt    *time.Time          `json:"updated_at"`
-	Owner        *User               `json:"owner"`
-	LastPipeline *LastPipeline       `json:"last_pipeline"`
-	Variables    []*PipelineVariable `json:"variables"`
-}
-
-// LastPipeline represents the last pipeline ran by schedule
-// this will be returned only for individual schedule get operation
-type LastPipeline struct {
-	ID     int    `json:"id"`
-	SHA    string `json:"sha"`
-	Ref    string `json:"ref"`
-	Status string `json:"status"`
+	ID           int        `json:"id"`
+	Description  string     `json:"description"`
+	Ref          string     `json:"ref"`
+	Cron         string     `json:"cron"`
+	CronTimezone string     `json:"cron_timezone"`
+	NextRunAt    *time.Time `json:"next_run_at"`
+	Active       bool       `json:"active"`
+	CreatedAt    *time.Time `json:"created_at"`
+	UpdatedAt    *time.Time `json:"updated_at"`
+	Owner        *User      `json:"owner"`
+	LastPipeline struct {
+		ID     int    `json:"id"`
+		SHA    string `json:"sha"`
+		Ref    string `json:"ref"`
+		Status string `json:"status"`
+	} `json:"last_pipeline"`
+	Variables []*PipelineVariable `json:"variables"`
 }
 
 // ListPipelineSchedulesOptions represents the available ListPipelineTriggers() options.
@@ -86,7 +82,7 @@ func (s *PipelineSchedulesService) ListPipelineSchedules(pid interface{}, opt *L
 		return nil, resp, err
 	}
 
-	return ps, resp, nil
+	return ps, resp, err
 }
 
 // GetPipelineSchedule gets a pipeline schedule.
@@ -111,7 +107,7 @@ func (s *PipelineSchedulesService) GetPipelineSchedule(pid interface{}, schedule
 		return nil, resp, err
 	}
 
-	return p, resp, nil
+	return p, resp, err
 }
 
 // ListPipelinesTriggeredByScheduleOptions represents the available
@@ -144,7 +140,7 @@ func (s *PipelineSchedulesService) ListPipelinesTriggeredBySchedule(pid interfac
 		return nil, resp, err
 	}
 
-	return p, resp, nil
+	return p, resp, err
 }
 
 // CreatePipelineScheduleOptions represents the available
@@ -182,7 +178,7 @@ func (s *PipelineSchedulesService) CreatePipelineSchedule(pid interface{}, opt *
 		return nil, resp, err
 	}
 
-	return p, resp, nil
+	return p, resp, err
 }
 
 // EditPipelineScheduleOptions represents the available
@@ -220,7 +216,7 @@ func (s *PipelineSchedulesService) EditPipelineSchedule(pid interface{}, schedul
 		return nil, resp, err
 	}
 
-	return p, resp, nil
+	return p, resp, err
 }
 
 // TakeOwnershipOfPipelineSchedule sets the owner of the specified
@@ -246,7 +242,7 @@ func (s *PipelineSchedulesService) TakeOwnershipOfPipelineSchedule(pid interface
 		return nil, resp, err
 	}
 
-	return p, resp, nil
+	return p, resp, err
 }
 
 // DeletePipelineSchedule deletes a pipeline schedule.
@@ -320,7 +316,7 @@ func (s *PipelineSchedulesService) CreatePipelineScheduleVariable(pid interface{
 		return nil, resp, err
 	}
 
-	return p, resp, nil
+	return p, resp, err
 }
 
 // EditPipelineScheduleVariableOptions represents the available
@@ -355,7 +351,7 @@ func (s *PipelineSchedulesService) EditPipelineScheduleVariable(pid interface{},
 		return nil, resp, err
 	}
 
-	return p, resp, nil
+	return p, resp, err
 }
 
 // DeletePipelineScheduleVariable creates a pipeline schedule variable.
@@ -380,5 +376,5 @@ func (s *PipelineSchedulesService) DeletePipelineScheduleVariable(pid interface{
 		return nil, resp, err
 	}
 
-	return p, resp, nil
+	return p, resp, err
 }

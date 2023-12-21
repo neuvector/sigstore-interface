@@ -153,7 +153,7 @@ func (s *UsersService) ListUsers(opt *ListUsersOptions, options ...RequestOption
 		return nil, resp, err
 	}
 
-	return usr, resp, nil
+	return usr, resp, err
 }
 
 // GetUsersOptions represents the available GetUser() options.
@@ -180,7 +180,7 @@ func (s *UsersService) GetUser(user int, opt GetUsersOptions, options ...Request
 		return nil, resp, err
 	}
 
-	return usr, resp, nil
+	return usr, resp, err
 }
 
 // CreateUserOptions represents the available CreateUser() options.
@@ -228,7 +228,7 @@ func (s *UsersService) CreateUser(opt *CreateUserOptions, options ...RequestOpti
 		return nil, resp, err
 	}
 
-	return usr, resp, nil
+	return usr, resp, err
 }
 
 // ModifyUserOptions represents the available ModifyUser() options.
@@ -279,7 +279,7 @@ func (s *UsersService) ModifyUser(user int, opt *ModifyUserOptions, options ...R
 		return nil, resp, err
 	}
 
-	return usr, resp, nil
+	return usr, resp, err
 }
 
 // DeleteUser deletes a user. Available only for administrators. This is an
@@ -315,7 +315,7 @@ func (s *UsersService) CurrentUser(options ...RequestOptionFunc) (*User, *Respon
 		return nil, resp, err
 	}
 
-	return usr, resp, nil
+	return usr, resp, err
 }
 
 // UserStatus represents the current status of a user
@@ -345,7 +345,7 @@ func (s *UsersService) CurrentUserStatus(options ...RequestOptionFunc) (*UserSta
 		return nil, resp, err
 	}
 
-	return status, resp, nil
+	return status, resp, err
 }
 
 // GetUserStatus retrieves a user's status
@@ -366,7 +366,7 @@ func (s *UsersService) GetUserStatus(user int, options ...RequestOptionFunc) (*U
 		return nil, resp, err
 	}
 
-	return status, resp, nil
+	return status, resp, err
 }
 
 // UserStatusOptions represents the options required to set the status
@@ -395,37 +395,7 @@ func (s *UsersService) SetUserStatus(opt *UserStatusOptions, options ...RequestO
 		return nil, resp, err
 	}
 
-	return status, resp, nil
-}
-
-// UserAssociationsCount represents the user associations count.
-//
-// Gitlab API docs: https://docs.gitlab.com/ee/api/users.html#list-associations-count-for-user
-type UserAssociationsCount struct {
-	GroupsCount        int `json:"groups_count"`
-	ProjectsCount      int `json:"projects_count"`
-	IssuesCount        int `json:"issues_count"`
-	MergeRequestsCount int `json:"merge_requests_count"`
-}
-
-// GetUserAssociationsCount gets a list of a specified user associations.
-//
-// Gitlab API docs: https://docs.gitlab.com/ee/api/users.html#list-associations-count-for-user
-func (s *UsersService) GetUserAssociationsCount(user int, options ...RequestOptionFunc) (*UserAssociationsCount, *Response, error) {
-	u := fmt.Sprintf("users/%d/associations_count", user)
-
-	req, err := s.client.NewRequest(http.MethodGet, u, nil, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	uac := new(UserAssociationsCount)
-	resp, err := s.client.Do(req, uac)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return uac, resp, nil
+	return status, resp, err
 }
 
 // SSHKey represents a SSH key.
@@ -439,16 +409,11 @@ type SSHKey struct {
 	ExpiresAt *time.Time `json:"expires_at"`
 }
 
-// ListSSHKeysOptions represents the available ListSSHKeys options.
-//
-// GitLab API docs: https://docs.gitlab.com/ee/api/users.html#list-ssh-keys
-type ListSSHKeysOptions ListOptions
-
 // ListSSHKeys gets a list of currently authenticated user's SSH keys.
 //
 // GitLab API docs: https://docs.gitlab.com/ee/api/users.html#list-ssh-keys
-func (s *UsersService) ListSSHKeys(opt *ListSSHKeysOptions, options ...RequestOptionFunc) ([]*SSHKey, *Response, error) {
-	req, err := s.client.NewRequest(http.MethodGet, "user/keys", opt, options)
+func (s *UsersService) ListSSHKeys(options ...RequestOptionFunc) ([]*SSHKey, *Response, error) {
+	req, err := s.client.NewRequest(http.MethodGet, "user/keys", nil, options)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -459,7 +424,7 @@ func (s *UsersService) ListSSHKeys(opt *ListSSHKeysOptions, options ...RequestOp
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // ListSSHKeysForUserOptions represents the available ListSSHKeysForUser() options.
@@ -490,7 +455,7 @@ func (s *UsersService) ListSSHKeysForUser(uid interface{}, opt *ListSSHKeysForUs
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // GetSSHKey gets a single key.
@@ -510,7 +475,7 @@ func (s *UsersService) GetSSHKey(key int, options ...RequestOptionFunc) (*SSHKey
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // GetSSHKeyForUser gets a single key for a given user.
@@ -530,7 +495,7 @@ func (s *UsersService) GetSSHKeyForUser(user int, key int, options ...RequestOpt
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // AddSSHKeyOptions represents the available AddSSHKey() options.
@@ -557,7 +522,7 @@ func (s *UsersService) AddSSHKey(opt *AddSSHKeyOptions, options ...RequestOption
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // AddSSHKeyForUser creates new key owned by specified user. Available only for
@@ -578,7 +543,7 @@ func (s *UsersService) AddSSHKeyForUser(user int, opt *AddSSHKeyOptions, options
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // DeleteSSHKey deletes key owned by currently authenticated user. This is an
@@ -638,7 +603,7 @@ func (s *UsersService) ListGPGKeys(options ...RequestOptionFunc) ([]*GPGKey, *Re
 		return nil, resp, err
 	}
 
-	return ks, resp, nil
+	return ks, resp, err
 }
 
 // GetGPGKey gets a specific GPG key of currently authenticated user.
@@ -658,7 +623,7 @@ func (s *UsersService) GetGPGKey(key int, options ...RequestOptionFunc) (*GPGKey
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // AddGPGKeyOptions represents the available AddGPGKey() options.
@@ -683,7 +648,7 @@ func (s *UsersService) AddGPGKey(opt *AddGPGKeyOptions, options ...RequestOption
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // DeleteGPGKey deletes a GPG key owned by currently authenticated user.
@@ -718,7 +683,7 @@ func (s *UsersService) ListGPGKeysForUser(user int, options ...RequestOptionFunc
 		return nil, resp, err
 	}
 
-	return ks, resp, nil
+	return ks, resp, err
 }
 
 // GetGPGKeyForUser gets a specific GPG key for a given user.
@@ -738,7 +703,7 @@ func (s *UsersService) GetGPGKeyForUser(user, key int, options ...RequestOptionF
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // AddGPGKeyForUser creates new GPG key owned by the specified user.
@@ -759,7 +724,7 @@ func (s *UsersService) AddGPGKeyForUser(user int, opt *AddGPGKeyOptions, options
 		return nil, resp, err
 	}
 
-	return k, resp, nil
+	return k, resp, err
 }
 
 // DeleteGPGKeyForUser deletes a GPG key owned by a specified user.
@@ -801,7 +766,7 @@ func (s *UsersService) ListEmails(options ...RequestOptionFunc) ([]*Email, *Resp
 		return nil, resp, err
 	}
 
-	return e, resp, nil
+	return e, resp, err
 }
 
 // ListEmailsForUserOptions represents the available ListEmailsForUser() options.
@@ -829,7 +794,7 @@ func (s *UsersService) ListEmailsForUser(user int, opt *ListEmailsForUserOptions
 		return nil, resp, err
 	}
 
-	return e, resp, nil
+	return e, resp, err
 }
 
 // GetEmail gets a single email.
@@ -849,7 +814,7 @@ func (s *UsersService) GetEmail(email int, options ...RequestOptionFunc) (*Email
 		return nil, resp, err
 	}
 
-	return e, resp, nil
+	return e, resp, err
 }
 
 // AddEmailOptions represents the available AddEmail() options.
@@ -875,7 +840,7 @@ func (s *UsersService) AddEmail(opt *AddEmailOptions, options ...RequestOptionFu
 		return nil, resp, err
 	}
 
-	return e, resp, nil
+	return e, resp, err
 }
 
 // AddEmailForUser creates new email owned by specified user. Available only for
@@ -896,7 +861,7 @@ func (s *UsersService) AddEmailForUser(user int, opt *AddEmailOptions, options .
 		return nil, resp, err
 	}
 
-	return e, resp, nil
+	return e, resp, err
 }
 
 // DeleteEmail deletes email owned by currently authenticated user. This is an
@@ -1159,15 +1124,14 @@ func (s *UsersService) RejectUser(user int, options ...RequestOptionFunc) error 
 // GitLab API docs:
 // https://docs.gitlab.com/ee/api/users.html#get-all-impersonation-tokens-of-a-user
 type ImpersonationToken struct {
-	ID         int        `json:"id"`
-	Name       string     `json:"name"`
-	Active     bool       `json:"active"`
-	Token      string     `json:"token"`
-	Scopes     []string   `json:"scopes"`
-	Revoked    bool       `json:"revoked"`
-	CreatedAt  *time.Time `json:"created_at"`
-	ExpiresAt  *ISOTime   `json:"expires_at"`
-	LastUsedAt *time.Time `json:"last_used_at"`
+	ID        int        `json:"id"`
+	Name      string     `json:"name"`
+	Active    bool       `json:"active"`
+	Token     string     `json:"token"`
+	Scopes    []string   `json:"scopes"`
+	Revoked   bool       `json:"revoked"`
+	CreatedAt *time.Time `json:"created_at"`
+	ExpiresAt *ISOTime   `json:"expires_at"`
 }
 
 // GetAllImpersonationTokensOptions represents the available
@@ -1198,7 +1162,7 @@ func (s *UsersService) GetAllImpersonationTokens(user int, opt *GetAllImpersonat
 		return nil, resp, err
 	}
 
-	return ts, resp, nil
+	return ts, resp, err
 }
 
 // GetImpersonationToken retrieves an impersonation token of a user.
@@ -1219,7 +1183,7 @@ func (s *UsersService) GetImpersonationToken(user, token int, options ...Request
 		return nil, resp, err
 	}
 
-	return t, resp, nil
+	return t, resp, err
 }
 
 // CreateImpersonationTokenOptions represents the available
@@ -1251,7 +1215,7 @@ func (s *UsersService) CreateImpersonationToken(user int, opt *CreateImpersonati
 		return nil, resp, err
 	}
 
-	return t, resp, nil
+	return t, resp, err
 }
 
 // RevokeImpersonationToken revokes an impersonation token.
@@ -1298,39 +1262,7 @@ func (s *UsersService) CreatePersonalAccessToken(user int, opt *CreatePersonalAc
 		return nil, resp, err
 	}
 
-	return t, resp, nil
-}
-
-// CreatePersonalAccessTokenForCurrentUserOptions represents the available
-// CreatePersonalAccessTokenForCurrentUser() options.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/users.html#create-a-personal-access-token-with-limited-scopes-for-the-currently-authenticated-user
-type CreatePersonalAccessTokenForCurrentUserOptions struct {
-	Name      *string   `url:"name,omitempty" json:"name,omitempty"`
-	Scopes    *[]string `url:"scopes,omitempty" json:"scopes,omitempty"`
-	ExpiresAt *ISOTime  `url:"expires_at,omitempty" json:"expires_at,omitempty"`
-}
-
-// CreatePersonalAccessTokenForCurrentUser creates a personal access token with limited scopes for the currently authenticated user.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/users.html#create-a-personal-access-token-with-limited-scopes-for-the-currently-authenticated-user
-func (s *UsersService) CreatePersonalAccessTokenForCurrentUser(opt *CreatePersonalAccessTokenForCurrentUserOptions, options ...RequestOptionFunc) (*PersonalAccessToken, *Response, error) {
-	u := "user/personal_access_tokens"
-
-	req, err := s.client.NewRequest(http.MethodPost, u, opt, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	t := new(PersonalAccessToken)
-	resp, err := s.client.Do(req, &t)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return t, resp, nil
+	return t, resp, err
 }
 
 // UserActivity represents an entry in the user/activities response
@@ -1367,7 +1299,7 @@ func (s *UsersService) GetUserActivities(opt *GetUserActivitiesOptions, options 
 		return nil, resp, err
 	}
 
-	return t, resp, nil
+	return t, resp, err
 }
 
 // UserMembership represents a membership of the user in a namespace or project.
@@ -1408,7 +1340,7 @@ func (s *UsersService) GetUserMemberships(user int, opt *GetUserMembershipOption
 		return nil, resp, err
 	}
 
-	return m, resp, nil
+	return m, resp, err
 }
 
 // DisableTwoFactor disables two factor authentication for the specified user.
@@ -1440,51 +1372,4 @@ func (s *UsersService) DisableTwoFactor(user int, options ...RequestOptionFunc) 
 	default:
 		return fmt.Errorf("Received unexpected result code: %d", resp.StatusCode)
 	}
-}
-
-// UserRunner represents a GitLab runner linked to the current user.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/users.html#create-a-runner
-type UserRunner struct {
-	ID             int        `json:"id"`
-	Token          string     `json:"token"`
-	TokenExpiresAt *time.Time `json:"token_expires_at"`
-}
-
-// CreateUserRunnerOptions represents the available CreateUserRunner() options.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/users.html#create-a-runner
-type CreateUserRunnerOptions struct {
-	RunnerType      *string   `url:"runner_type,omitempty" json:"runner_type,omitempty"`
-	GroupID         *int      `url:"group_id,omitempty" json:"group_id,omitempty"`
-	ProjectID       *int      `url:"project_id,omitempty" json:"project_id,omitempty"`
-	Description     *string   `url:"description,omitempty" json:"description,omitempty"`
-	Paused          *bool     `url:"paused,omitempty" json:"paused,omitempty"`
-	Locked          *bool     `url:"locked,omitempty" json:"locked,omitempty"`
-	RunUntagged     *bool     `url:"run_untagged,omitempty" json:"run_untagged,omitempty"`
-	TagList         *[]string `url:"tag_list,omitempty" json:"tag_list,omitempty"`
-	AccessLevel     *string   `url:"access_level,omitempty" json:"access_level,omitempty"`
-	MaximumTimeout  *int      `url:"maximum_timeout,omitempty" json:"maximum_timeout,omitempty"`
-	MaintenanceNote *string   `url:"maintenance_note,omitempty" json:"maintenance_note,omitempty"`
-}
-
-// CreateUserRunner creates a runner linked to the current user.
-//
-// GitLab API docs:
-// https://docs.gitlab.com/ee/api/users.html#create-a-runner
-func (s *UsersService) CreateUserRunner(opts *CreateUserRunnerOptions, options ...RequestOptionFunc) (*UserRunner, *Response, error) {
-	req, err := s.client.NewRequest(http.MethodPost, "user/runners", opts, options)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	r := new(UserRunner)
-	resp, err := s.client.Do(req, r)
-	if err != nil {
-		return nil, resp, err
-	}
-
-	return r, resp, nil
 }

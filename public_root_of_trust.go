@@ -44,13 +44,16 @@ func GetTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error
 	if err != nil {
 		return nil, fmt.Errorf("could not create remote store object: %s", err.Error())
 	}
-	tufClient := tufclient.NewClient(tufclient.MemoryLocalStore(), remoteStore)
-	tufClient.Init([]byte(SigstoreTUFRootJSON))
-	err = tufClient.UpdateRoots()
+	localClient := tufclient.NewClient(tufclient.MemoryLocalStore(), remoteStore)
+	err = localClient.Init([]byte(SigstoreTUFRootJSON))
+	if err != nil {
+		return nil, fmt.Errorf("error initializing tuf client: %s", err.Error())
+	}
+	err = localClient.UpdateRoots()
 	if err != nil {
 		return nil, fmt.Errorf("error updating tuf client roots: %s", err.Error())
 	}
-	_, err = tufClient.Update()
+	_, err = localClient.Update()
 	if err != nil {
 		return nil, fmt.Errorf("error updating tuf client metadata: %s", err.Error())
 	}
@@ -65,7 +68,7 @@ func GetTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error
 		Sigstore customMetadata `json:"sigstore"`
 	}
 
-	targets, err := tufClient.Targets()
+	targets, err := localClient.Targets()
 	if err != nil {
 		return nil, fmt.Errorf("error getting targets: %w", err)
 	}
@@ -83,7 +86,7 @@ func GetTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error
 		}
 		if scm.Sigstore.Usage == usage {
 			dest := inMemoryDest{}
-			err = tufClient.Download(name, dest)
+			err = localClient.Download(name, dest)
 			if err != nil {
 				globalBuffer.Reset()
 				return nil, fmt.Errorf("error downloading target: %s", err.Error())

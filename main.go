@@ -194,7 +194,7 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 	// rekor public keys
 	rekorKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
 	if rootOfTrust.RekorPublicKey == "" {
-		rekorKeyTargets, err := GetTargets(sigtuf.Rekor, proxy)
+		rekorKeyTargets, err := GetSigstorePublicTufTargets(sigtuf.Rekor, proxy)
 		if err != nil {
 			return fmt.Errorf("could not retrieve rekor tuf targets: %s", err.Error())
 		}
@@ -234,7 +234,7 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 		cosignOptions.RootCerts = rootPool
 		cosignOptions.IntermediateCerts = intermediatePool
 	} else {
-		targetCertificates, err := GetTargets(sigtuf.Fulcio, proxy)
+		targetCertificates, err := GetSigstorePublicTufTargets(sigtuf.Fulcio, proxy)
 		// certificates, err := GetPublicRootOfTrustFulcioCertificates(proxy)
 		if err != nil {
 			return fmt.Errorf("could not retrieve public root of trust fulcio certificates: %s", err.Error())
@@ -264,7 +264,7 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 	// sct public keys
 	sctKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
 	if rootOfTrust.SCTPublicKey == "" {
-		sctKeyTargets, err := GetTargets(sigtuf.CTFE, proxy)
+		sctKeyTargets, err := GetSigstorePublicTufTargets(sigtuf.CTFE, proxy)
 		if err != nil {
 			return fmt.Errorf("could not retrieve ctfe tuf targets: %s", err.Error())
 		}

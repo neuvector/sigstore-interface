@@ -25,7 +25,7 @@ func (d inMemoryDest) Delete() error {
 	panic("inMemoryDest delete function should not run")
 }
 
-func GetTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error) {
+func GetSigstorePublicTufTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.TargetFile, error) {
 	// client initialization
 	httpClient := &http.Client{
 		Timeout: 20 * time.Second,

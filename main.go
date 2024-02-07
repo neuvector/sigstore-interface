@@ -30,11 +30,12 @@ type Configuration struct {
 }
 
 type RootOfTrust struct {
-	Name           string     `json:"Name"`
-	RekorPublicKey string     `json:"RekorPublicKey"`
-	RootCert       string     `json:"RootCert"`
-	SCTPublicKey   string     `json:"SCTPublicKey"`
-	Verifiers      []Verifier `json:"Verifiers"`
+	Name                 string     `json:"Name"`
+	RootlessKeypairsOnly bool       `json:"RootlessKeypairsOnly"`
+	RekorPublicKey       string     `json:"RekorPublicKey"`
+	RootCert             string     `json:"RootCert"`
+	SCTPublicKey         string     `json:"SCTPublicKey"`
+	Verifiers            []Verifier `json:"Verifiers"`
 }
 
 func (r *RootOfTrust) IsPublic() bool {
@@ -191,10 +192,14 @@ func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature, pr
 }
 
 func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust RootOfTrust, proxy Proxy, ctx context.Context) (err error) {
+	if rootOfTrust.RootlessKeypairsOnly {
+		return nil
+	}
+
 	// rekor public keys
 	rekorKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
-	if rootOfTrust.RekorPublicKey == "" {
-		rekorKeyTargets, err := GetTargets(sigtuf.Rekor, proxy)
+	if rootOfTrust.IsPublic() {
+		rekorKeyTargets, err := GetSigstorePublicTufTargets(sigtuf.Rekor, proxy)
 		if err != nil {
 			return fmt.Errorf("could not retrieve rekor tuf targets: %s", err.Error())
 		}
@@ -203,7 +208,7 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 				return fmt.Errorf("could not add public root of trust rekor public key to collection: %w", err)
 			}
 		}
-	} else {
+	} else if rootOfTrust.RekorPublicKey != "" {
 		if err := rekorKeyCollection.AddTransparencyLogPubKey([]byte(rootOfTrust.RekorPublicKey), sigtuf.Active); err != nil {
 			return fmt.Errorf("could not add custom root of trust rekor public key to collection: %w", err)
 		}
@@ -233,8 +238,8 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 		}
 		cosignOptions.RootCerts = rootPool
 		cosignOptions.IntermediateCerts = intermediatePool
-	} else {
-		targetCertificates, err := GetTargets(sigtuf.Fulcio, proxy)
+	} else if rootOfTrust.IsPublic() {
+		targetCertificates, err := GetSigstorePublicTufTargets(sigtuf.Fulcio, proxy)
 		// certificates, err := GetPublicRootOfTrustFulcioCertificates(proxy)
 		if err != nil {
 			return fmt.Errorf("could not retrieve public root of trust fulcio certificates: %s", err.Error())
@@ -263,8 +268,8 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 
 	// sct public keys
 	sctKeyCollection := cosign.NewTrustedTransparencyLogPubKeys()
-	if rootOfTrust.SCTPublicKey == "" {
-		sctKeyTargets, err := GetTargets(sigtuf.CTFE, proxy)
+	if rootOfTrust.IsPublic() {
+		sctKeyTargets, err := GetSigstorePublicTufTargets(sigtuf.CTFE, proxy)
 		if err != nil {
 			return fmt.Errorf("could not retrieve ctfe tuf targets: %s", err.Error())
 		}
@@ -273,7 +278,7 @@ func setRootOfTrustCosignOptions(cosignOptions *cosign.CheckOpts, rootOfTrust Ro
 				return fmt.Errorf("could not add public root of trust sct public key to collection: %w", err)
 			}
 		}
-	} else {
+	} else if rootOfTrust.SCTPublicKey != "" {
 		if err := sctKeyCollection.AddTransparencyLogPubKey([]byte(rootOfTrust.SCTPublicKey), sigtuf.Active); err != nil {
 			return fmt.Errorf("could not add custom root of trust sct public key to collection: %w", err)
 		}
@@ -291,6 +296,12 @@ func setVerifierCosignOptions(cosignOptions *cosign.CheckOpts, verifier Verifier
 			return fmt.Errorf("could not load PEM encoded public key of verifier %s under %s: %s", verifier.Name, rootOfTrust.Name, err.Error())
 		}
 	case "keyless":
+		if rootOfTrust.RootlessKeypairsOnly {
+			return fmt.Errorf("cannot use keyless verifier for root of trust with field RootlessKeypairsOnly set to true")
+		}
+		if rootOfTrust.RootCert == "" && !rootOfTrust.IsPublic() {
+			return fmt.Errorf("cannot use keyless verifier %s with private root of trust without root cert", verifier.Name)
+		}
 		cosignOptions.Identities = []cosign.Identity{
 			{
 				Issuer:  verifier.KeylessOptions.CertIssuer,
@@ -308,6 +319,10 @@ func setVerifierCosignOptions(cosignOptions *cosign.CheckOpts, verifier Verifier
 		if rootOfTrust.SCTPublicKey == "" {
 			cosignOptions.IgnoreSCT = true
 		}
+	}
+	if rootOfTrust.RootlessKeypairsOnly {
+		cosignOptions.IgnoreSCT = true
+		cosignOptions.IgnoreTlog = true
 	}
 	return nil
 }

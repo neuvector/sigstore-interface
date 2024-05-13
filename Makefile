@@ -1,7 +1,7 @@
 .PHONY: 
 
 BASE_IMAGE_TAG = latest
-BUILD_IMAGE_TAG = v1
+BUILD_IMAGE_TAG = v2
 
 all:
 	go build -ldflags='-s -w' -buildvcs=false .

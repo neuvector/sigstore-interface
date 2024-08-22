@@ -7,6 +7,7 @@ toolchain go1.22.5
 require (
 	github.com/google/go-containerregistry v0.19.1
 	github.com/sigstore/cosign/v2 v2.2.4
+	github.com/sigstore/rekor v1.3.6
 	github.com/sigstore/sigstore v1.8.3
 	github.com/theupdateframework/go-tuf v0.7.0
 )
@@ -82,7 +83,6 @@ require (
 	github.com/sassoftware/relic v7.2.1+incompatible // indirect
 	github.com/secure-systems-lab/go-securesystemslib v0.8.0 // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
-	github.com/sigstore/rekor v1.3.6 // indirect
 	github.com/sigstore/timestamp-authority v1.2.2 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect

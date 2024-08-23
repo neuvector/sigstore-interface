@@ -19,9 +19,12 @@ import (
 	"github.com/sigstore/cosign/v2/pkg/oci"
 	"github.com/sigstore/cosign/v2/pkg/oci/signature"
 	sig "github.com/sigstore/cosign/v2/pkg/signature"
+	rekor "github.com/sigstore/rekor/pkg/client"
 	"github.com/sigstore/sigstore/pkg/cryptoutils"
 	sigtuf "github.com/sigstore/sigstore/pkg/tuf"
 )
+
+const DEFAULT_REKOR_URL string = "https://rekor.sigstore.dev"
 
 type Configuration struct {
 	ImageDigest   string        `json:"ImageDigest"`
@@ -159,6 +162,10 @@ func generateCosignSignatureObjects(sigData SignatureData) ([]oci.Signature, err
 	return signatures, nil
 }
 
+func printWarningLine(message string) {
+	fmt.Printf("\033[33m%s\033[0m\n", message)
+}
+
 func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature, proxy Proxy) (satisfiedVerifiers []string, err error) {
 	ctx := context.Background()
 	cosignOptions := cosign.CheckOpts{ClaimVerifier: cosign.SimpleClaimVerifier}
@@ -169,22 +176,35 @@ func verify(imgDigest v1.Hash, rootOfTrust RootOfTrust, sigs []oci.Signature, pr
 	for _, verifier := range rootOfTrust.Verifiers {
 		cosignOptions.SigVerifier = nil
 		cosignOptions.Identities = nil
+
 		fmt.Printf(">> checking verifier %s\n", verifier.Name)
 		err = setVerifierCosignOptions(&cosignOptions, verifier, rootOfTrust, ctx)
 		if err != nil {
 			fmt.Printf("ERROR: %s\n", err.Error())
-		} else {
-			for i, signature := range sigs {
-				fmt.Printf("verifying signature %d\n", i)
-				_, err := cosign.VerifyImageSignature(ctx, signature, imgDigest, &cosignOptions)
-				if err != nil {
-					// the image is not signed by this verifier
-					fmt.Printf("signature not verified: %s\n", err.Error())
-				} else {
-					fmt.Printf("signature %d satisfies verifier %s\n", i, verifier.Name)
-					satisfiedVerifiers = append(satisfiedVerifiers, fmt.Sprintf("%s/%s", rootOfTrust.Name, verifier.Name))
-					break
-				}
+			fmt.Println("could not create valid cosign options for verifier, skipping verifier")
+			continue
+		}
+
+		for i, signature := range sigs {
+			bundle, err := signature.Bundle()
+			if err != nil {
+				fmt.Printf("error when retrieving bundle for signature, skipping signature: %s\n", err.Error())
+				continue
+			}
+			if bundle == nil {
+				printWarningLine("no bundle found, any tlog verification must happen through network")
+			} else {
+				fmt.Printf("signature bundle: %s\n", bundle.Payload.LogID)
+			}
+			fmt.Printf("verifying signature %d\n", i)
+			_, err = cosign.VerifyImageSignature(ctx, signature, imgDigest, &cosignOptions)
+			if err != nil {
+				// the image is not signed by this verifier
+				fmt.Printf("signature not verified: %s\n", err.Error())
+			} else {
+				fmt.Printf("signature %d satisfies verifier %s\n", i, verifier.Name)
+				satisfiedVerifiers = append(satisfiedVerifiers, fmt.Sprintf("%s/%s", rootOfTrust.Name, verifier.Name))
+				break
 			}
 		}
 	}
@@ -319,6 +339,12 @@ func setVerifierCosignOptions(cosignOptions *cosign.CheckOpts, verifier Verifier
 		if rootOfTrust.SCTPublicKey == "" {
 			cosignOptions.IgnoreSCT = true
 		}
+	} else {
+		rekorClient, err := rekor.GetRekorClient(DEFAULT_REKOR_URL)
+		if err != nil {
+			return fmt.Errorf("could not get rekor client for online tlog validation: %s", err.Error())
+		}
+		cosignOptions.RekorClient = rekorClient
 	}
 	if rootOfTrust.RootlessKeypairsOnly {
 		cosignOptions.IgnoreSCT = true

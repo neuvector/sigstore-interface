@@ -32,7 +32,7 @@ func GetSigstorePublicTufTargets(usage sigtuf.UsageKind, proxy Proxy) ([]sigtuf.
 	}
 	if proxy.URL != "" {
 		transport := proxy.HttpTransport()
-		httpClient.Transport = &transport
+		httpClient.Transport = transport
 	} else {
 		httpClient.Transport = &http.Transport{
 			TLSClientConfig: &tls.Config{

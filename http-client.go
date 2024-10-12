@@ -24,11 +24,11 @@ func (p Proxy) BasicAuthorizationHeader() string {
 	return "Basic " + encodedAuth
 }
 
-func (p Proxy) HttpTransport() http.Transport {
+func (p Proxy) HttpTransport() *http.Transport {
 	proxyURLFunc := func(r *http.Request) (*url.URL, error) {
 		return url.Parse(p.URL)
 	}
-	transport := http.Transport{
+	transport := &http.Transport{
 		Proxy: proxyURLFunc,
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,

@@ -5,8 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"log"
 	"os/exec"
+
+	log "github.com/sirupsen/logrus"
 )
 
 var proxyURL = flag.String("proxy-url", "", "")
@@ -32,7 +33,9 @@ func main() {
 
 	go func() {
 		fmt.Println("writing to stdin")
-		io.WriteString(stdin, *proxyLogin)
+		if _, err := io.WriteString(stdin, *proxyLogin); err != nil {
+			log.WithError(err).Error("Failed to write to stdin")
+		}
 		closeErr = stdin.Close()
 	}()
 
@@ -51,7 +54,9 @@ func main() {
 		fmt.Println(scanner.Text())
 	}
 
-	cmd.Wait()
+	if err := cmd.Wait(); err != nil {
+		log.WithError(err).Error("failed to wait for cmd")
+	}
 
 	if closeErr != nil {
 		fmt.Printf("error when closing stdin pipe: %s\n", closeErr)

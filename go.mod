@@ -8,9 +8,10 @@ require (
 	github.com/google/go-containerregistry v0.19.1
 	github.com/sigstore/cosign/v2 v2.2.4
 	github.com/sigstore/rekor v1.3.6
-	github.com/sigstore/sigstore v1.8.3
+	github.com/sigstore/sigstore v1.8.4
 	github.com/sirupsen/logrus v1.9.3
 	github.com/theupdateframework/go-tuf v0.7.0
+	github.com/theupdateframework/go-tuf/v2 v2.0.2
 )
 
 require (
@@ -88,7 +89,7 @@ require (
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
-	github.com/spf13/cobra v1.8.0 // indirect
+	github.com/spf13/cobra v1.8.1 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.18.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
@@ -108,7 +109,7 @@ require (
 	golang.org/x/exp v0.0.0-20231108232855-2478ac86f678 // indirect
 	golang.org/x/mod v0.17.0 // indirect
 	golang.org/x/net v0.33.0 // indirect
-	golang.org/x/oauth2 v0.19.0 // indirect
+	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/term v0.27.0 // indirect

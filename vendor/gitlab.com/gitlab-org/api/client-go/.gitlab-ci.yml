@@ -109,7 +109,7 @@ tests:unit:
 generate-release-notes:
   stage: deploy
   needs: []
-  image: alpine:3.21.2
+  image: alpine:3.21.3
   before_script:
     - apk add --update jq curl git
   script:

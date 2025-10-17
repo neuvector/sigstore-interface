@@ -147,7 +147,7 @@ tests:unit:
     when: always
 
 release:
-  image: node:24-bookworm-slim
+  image: node:25-bookworm-slim
   stage: deploy
   before_script:
     - apt-get update && apt-get install -y --no-install-recommends git-core ca-certificates

@@ -10,7 +10,7 @@ require (
 	github.com/sigstore/rekor v1.3.10
 	github.com/sigstore/sigstore v1.9.5
 	github.com/sirupsen/logrus v1.9.3
-	github.com/theupdateframework/go-tuf v0.7.0
+	github.com/theupdateframework/go-tuf/v2 v2.3.0
 )
 
 require (

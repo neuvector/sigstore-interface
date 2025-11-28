@@ -88,7 +88,7 @@ verify-generated-code:
     - .go:base
   stage: lint
   needs: []
-  image: golang:1.24-bookworm
+  image: golang:1.25-bookworm
   script:
     - make generate
     - |

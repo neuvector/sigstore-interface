@@ -6,7 +6,7 @@ toolchain go1.24.5
 
 require (
 	github.com/google/go-containerregistry v0.20.6
-	github.com/sigstore/cosign/v2 v2.5.2
+	github.com/sigstore/cosign/v3 v3.0.2
 	github.com/sigstore/rekor v1.3.10
 	github.com/sigstore/sigstore v1.9.5
 	github.com/sirupsen/logrus v1.9.3

@@ -107,7 +107,7 @@ commitlint:
   rules:
     - if: $CI_PIPELINE_SOURCE == 'merge_request_event'
   image:
-    name: commitlint/commitlint:19.8.1
+    name: commitlint/commitlint:20.2.0
     entrypoint: [""]
   script:
     - commitlint --from ${CI_MERGE_REQUEST_DIFF_BASE_SHA} --to ${CI_COMMIT_SHA}

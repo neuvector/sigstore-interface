@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-containerregistry/pkg/name"
 	"github.com/google/go-containerregistry/pkg/v1/remote"
 	"github.com/google/go-containerregistry/pkg/v1/remote/transport"
-	coSigRemote "github.com/sigstore/cosign/v2/pkg/oci/remote"
+	coSigRemote "github.com/sigstore/cosign/v3/pkg/oci/remote"
 )
 
 type CosignOCISignature struct {

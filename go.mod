@@ -6,7 +6,7 @@ require (
 	github.com/google/go-containerregistry v0.20.7
 	github.com/sigstore/cosign/v3 v3.0.3
 	github.com/sigstore/rekor v1.4.3
-	github.com/sigstore/sigstore v1.10.0
+	github.com/sigstore/sigstore v1.10.3
 	github.com/sirupsen/logrus v1.9.4-0.20230606125235-dd1b4c2e81af
 	github.com/theupdateframework/go-tuf v0.7.0
 )

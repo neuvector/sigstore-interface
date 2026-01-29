@@ -60,8 +60,8 @@ github.com/emicklei/go-restful/v3/log
 # github.com/fxamacker/cbor/v2 v2.9.0
 ## explicit; go 1.20
 github.com/fxamacker/cbor/v2
-# github.com/go-chi/chi/v5 v5.2.3
-## explicit; go 1.20
+# github.com/go-chi/chi/v5 v5.2.4
+## explicit; go 1.22
 github.com/go-chi/chi/v5
 github.com/go-chi/chi/v5/middleware
 # github.com/go-jose/go-jose/v4 v4.1.3
@@ -85,7 +85,7 @@ github.com/go-openapi/analysis/internal/flatten/operations
 github.com/go-openapi/analysis/internal/flatten/replace
 github.com/go-openapi/analysis/internal/flatten/schutils
 github.com/go-openapi/analysis/internal/flatten/sortref
-# github.com/go-openapi/errors v0.22.5
+# github.com/go-openapi/errors v0.22.6
 ## explicit; go 1.24.0
 github.com/go-openapi/errors
 # github.com/go-openapi/jsonpointer v0.22.4
@@ -109,7 +109,7 @@ github.com/go-openapi/runtime/middleware/header
 github.com/go-openapi/runtime/middleware/untyped
 github.com/go-openapi/runtime/security
 github.com/go-openapi/runtime/yamlpc
-# github.com/go-openapi/spec v0.22.2
+# github.com/go-openapi/spec v0.22.3
 ## explicit; go 1.24.0
 github.com/go-openapi/spec
 # github.com/go-openapi/strfmt v0.25.0
@@ -312,8 +312,8 @@ github.com/pkg/errors
 ## explicit
 github.com/sassoftware/relic/lib/pkcs7
 github.com/sassoftware/relic/lib/x509tools
-# github.com/secure-systems-lab/go-securesystemslib v0.9.1
-## explicit; go 1.23.0
+# github.com/secure-systems-lab/go-securesystemslib v0.10.0
+## explicit; go 1.24.0
 github.com/secure-systems-lab/go-securesystemslib/cjson
 github.com/secure-systems-lab/go-securesystemslib/dsse
 github.com/secure-systems-lab/go-securesystemslib/encrypted
@@ -355,8 +355,8 @@ github.com/sigstore/protobuf-specs/gen/pb-go/common/v1
 github.com/sigstore/protobuf-specs/gen/pb-go/dsse
 github.com/sigstore/protobuf-specs/gen/pb-go/rekor/v1
 github.com/sigstore/protobuf-specs/gen/pb-go/trustroot/v1
-# github.com/sigstore/rekor v1.4.3
-## explicit; go 1.24.0
+# github.com/sigstore/rekor v1.5.0
+## explicit; go 1.25.0
 github.com/sigstore/rekor/pkg/client
 github.com/sigstore/rekor/pkg/generated/client
 github.com/sigstore/rekor/pkg/generated/client/entries
@@ -397,7 +397,7 @@ github.com/sigstore/rekor-tiles/v2/pkg/generated/protobuf
 github.com/sigstore/rekor-tiles/v2/pkg/note
 github.com/sigstore/rekor-tiles/v2/pkg/types/verifier
 github.com/sigstore/rekor-tiles/v2/pkg/verify
-# github.com/sigstore/sigstore v1.10.3
+# github.com/sigstore/sigstore v1.10.4
 ## explicit; go 1.25.0
 github.com/sigstore/sigstore/pkg/cryptoutils
 github.com/sigstore/sigstore/pkg/cryptoutils/goodkey
@@ -467,8 +467,8 @@ github.com/theupdateframework/go-tuf/pkg/targets
 github.com/theupdateframework/go-tuf/sign
 github.com/theupdateframework/go-tuf/util
 github.com/theupdateframework/go-tuf/verify
-# github.com/theupdateframework/go-tuf/v2 v2.3.0
-## explicit; go 1.24.9
+# github.com/theupdateframework/go-tuf/v2 v2.4.1
+## explicit; go 1.25.5
 github.com/theupdateframework/go-tuf/v2/metadata
 github.com/theupdateframework/go-tuf/v2/metadata/config
 github.com/theupdateframework/go-tuf/v2/metadata/fetcher
@@ -620,10 +620,10 @@ golang.org/x/time/rate
 google.golang.org/genproto/googleapis/api
 google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody
-# google.golang.org/genproto/googleapis/rpc v0.0.0-20251213004720-97cd9d5aeac2
+# google.golang.org/genproto/googleapis/rpc v0.0.0-20251222181119-0a764e51fe1b
 ## explicit; go 1.24.0
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.77.0
+# google.golang.org/grpc v1.78.0
 ## explicit; go 1.24.0
 google.golang.org/grpc
 google.golang.org/grpc/attributes

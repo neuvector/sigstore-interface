@@ -8,7 +8,7 @@ require (
 	github.com/sigstore/rekor v1.5.0
 	github.com/sigstore/sigstore v1.10.4
 	github.com/sirupsen/logrus v1.9.4-0.20230606125235-dd1b4c2e81af
-	github.com/theupdateframework/go-tuf v0.7.0
+	github.com/theupdateframework/go-tuf/v2 v2.4.1
 )
 
 require (

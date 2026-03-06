@@ -20,6 +20,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/sigstore/cosign/v3/internal/ui"
@@ -29,11 +30,15 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-func SignData(ctx context.Context, content sign.Content, keypair sign.Keypair, idToken string, cert []byte, signingConfig *root.SigningConfig, trustedMaterial root.TrustedMaterial) ([]byte, error) {
-	var opts sign.BundleOptions
+type SignOptions struct {
+	TSAClientTransport http.RoundTripper
+}
+
+func SignData(ctx context.Context, content sign.Content, keypair sign.Keypair, idToken string, cert []byte, signingConfig *root.SigningConfig, trustedMaterial root.TrustedMaterial, opts SignOptions) ([]byte, error) {
+	var bundleOpts sign.BundleOptions
 
 	if trustedMaterial != nil {
-		opts.TrustedRoot = trustedMaterial
+		bundleOpts.TrustedRoot = trustedMaterial
 	}
 
 	switch {
@@ -50,12 +55,12 @@ func SignData(ctx context.Context, content sign.Content, keypair sign.Keypair, i
 			Timeout: 30 * time.Second,
 			Retries: 1,
 		}
-		opts.CertificateProvider = sign.NewFulcio(fulcioOpts)
-		opts.CertificateProviderOptions = &sign.CertificateProviderOptions{
+		bundleOpts.CertificateProvider = sign.NewFulcio(fulcioOpts)
+		bundleOpts.CertificateProviderOptions = &sign.CertificateProviderOptions{
 			IDToken: idToken,
 		}
 	case cert != nil:
-		opts.CertificateProvider = &localCertProvider{cert}
+		bundleOpts.CertificateProvider = &localCertProvider{cert}
 	default:
 		publicKeyPem, err := keypair.GetPublicKeyPem()
 		if err != nil {
@@ -75,10 +80,10 @@ func SignData(ctx context.Context, content sign.Content, keypair sign.Keypair, i
 			return key, nil
 		})
 		trustedMaterial := &verifyTrustedMaterial{
-			TrustedMaterial:    opts.TrustedRoot,
+			TrustedMaterial:    bundleOpts.TrustedRoot,
 			keyTrustedMaterial: keyTrustedMaterial,
 		}
-		opts.TrustedRoot = trustedMaterial
+		bundleOpts.TrustedRoot = trustedMaterial
 	}
 
 	if len(signingConfig.TimestampAuthorityURLs()) != 0 {
@@ -93,10 +98,14 @@ func SignData(ctx context.Context, content sign.Content, keypair sign.Keypair, i
 				Timeout: 30 * time.Second,
 				Retries: 1,
 			}
-			opts.TimestampAuthorities = append(opts.TimestampAuthorities, sign.NewTimestampAuthority(tsaOpts))
+			if opts.TSAClientTransport != nil {
+				tsaOpts.Transport = opts.TSAClientTransport
+			}
+			bundleOpts.TimestampAuthorities = append(bundleOpts.TimestampAuthorities, sign.NewTimestampAuthority(tsaOpts))
 		}
 	}
 
+	var usingRekorV2 bool
 	if len(signingConfig.RekorLogURLs()) != 0 {
 		rekorSvcs, err := root.SelectServices(signingConfig.RekorLogURLs(),
 			signingConfig.RekorLogURLsConfig(), sign.RekorAPIVersions, time.Now())
@@ -104,20 +113,31 @@ func SignData(ctx context.Context, content sign.Content, keypair sign.Keypair, i
 			return nil, err
 		}
 		for _, rekorSvc := range rekorSvcs {
+			if rekorSvc.MajorAPIVersion == 2 {
+				usingRekorV2 = true
+			}
 			rekorOpts := &sign.RekorOptions{
 				BaseURL: rekorSvc.URL,
 				Timeout: 90 * time.Second,
 				Retries: 1,
 				Version: rekorSvc.MajorAPIVersion,
 			}
-			opts.TransparencyLogs = append(opts.TransparencyLogs, sign.NewRekor(rekorOpts))
+			bundleOpts.TransparencyLogs = append(bundleOpts.TransparencyLogs, sign.NewRekor(rekorOpts))
 		}
+	}
+	// When requesting a short-lived Fulcio certificate, a timestamp must be provided during
+	// verification. It can come from either Rekor v1 providing a signed entry timestamp, or
+	// from a timestamp authority. Rekor v2 doesn't timestamp entries, so when a client
+	// is configured to use Rekor v2 when retrieving a Fulcio certificate, we enforce
+	// that a timestamp authority is provided as well.
+	if usingRekorV2 && len(bundleOpts.TimestampAuthorities) == 0 && idToken != "" {
+		return nil, fmt.Errorf("a timestamp authority must be provided to request a short-lived certificate that will be logged to Rekor")
 	}
 
 	spinner := ui.NewSpinner(ctx, "Signing artifact...")
 	defer spinner.Stop()
 
-	bundle, err := sign.Bundle(content, keypair, opts)
+	bundle, err := sign.Bundle(content, keypair, bundleOpts)
 
 	if err != nil {
 		return nil, fmt.Errorf("error signing bundle: %w", err)

@@ -1,6 +1,6 @@
 module github.com/neuvector/sigstore-interface
 
-go 1.25.8
+go 1.25.9
 
 require (
 	github.com/google/go-containerregistry v0.20.7

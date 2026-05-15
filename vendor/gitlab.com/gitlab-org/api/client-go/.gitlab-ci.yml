@@ -160,7 +160,7 @@ verify-generated-code:
 Download GraphQL schema:
   stage: test
   needs: []
-  image: node:25-alpine
+  image: node:26-alpine
   script:
     - |
       if [ ! -f schema/gitlab.graphql ]; then
